@@ -157,7 +157,7 @@ impl DataApi for BitcoinDataApi {
                 rpc_caller
                     .rpc_call::<Response<GetBlockResponse>>(BitcoinJrpc::new(
                         "getblock",
-                        &[json!(hash), json!(2u32)],
+                        &[json!(trim_hash(&hash)), json!(2u32)],
                     ))
                     .await?
                     .height
@@ -168,15 +168,22 @@ impl DataApi for BitcoinDataApi {
             };
             vec![
                 json!("start"),
-                json!(ScanObjectsDescriptor {
-                    desc: data.account_identifier.address,
+                json!(vec!(json!(ScanObjectsDescriptor {
+                    desc: format!("addr({})", trim_hash(&data.account_identifier.address)),
                     range,
-                }),
+                }))),
             ]
         } else {
-            vec![json!("start"), json!(data.account_identifier.address)]
+            vec![
+                json!("start"),
+                json!(vec!(json!(format!(
+                    "addr({})",
+                    trim_hash(&data.account_identifier.address)
+                )))),
+            ]
         };
 
+        dbg!(&args);
         Ok(Json(
             rpc_caller
                 .rpc_call::<Response<ScanTxOutSetResult>>(BitcoinJrpc::new("scantxoutset", &args))
