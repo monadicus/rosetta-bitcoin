@@ -1,3 +1,5 @@
+//! rosetta data api implementation for bitcoind using mentat
+
 use mentat::{
     api::{Caller, CallerDataApi, DataApi, MentatResponse},
     axum::{async_trait, Json},
@@ -14,13 +16,10 @@ use mentat::{
 
 use crate::{
     request::{trim_hash, BitcoinJrpc, ScanObjectsDescriptor},
-    responses::{
-        common::{BitcoinTransaction, GetNetworkInfo, PeerInfo, ScanTxOutSetResult},
-        data::*,
-        Response,
-    },
+    responses::{common::BitcoinTransaction, data::*, Response},
 };
 
+/// rosetta data routes for bitcoind
 #[derive(Clone, Default)]
 pub struct BitcoinDataApi;
 
@@ -192,14 +191,14 @@ impl DataApi for BitcoinDataApi {
         ))
     }
 
-    // async fn account_coins(
-    //     &self,
-    //     _caller: Caller,
-    //     data: AccountCoinsRequest,
-    //     rpc_caller: RpcCaller,
-    // ) -> MentatResponse<AccountCoinsResponse> {
-    //     todo!()
-    // }
+    async fn account_coins(
+        &self,
+        _caller: Caller,
+        _data: AccountCoinsRequest,
+        _rpc_caller: RpcCaller,
+    ) -> MentatResponse<AccountCoinsResponse> {
+        todo!()
+    }
 
     async fn block(
         &self,

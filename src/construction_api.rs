@@ -1,15 +1,11 @@
+//! rosetta construction api implementation for bitcoind using mentat
+
 use std::str::FromStr;
 
 use bitcoin::{
     hash_types::PubkeyHash,
     psbt::serialize::{Deserialize, Serialize},
-    OutPoint,
-    Script,
-    Transaction,
-    TxIn,
-    TxOut,
-    Txid,
-    Witness,
+    OutPoint, Script, Transaction, TxIn, TxOut, Txid, Witness,
 };
 use mentat::{
     api::{Caller, CallerConstructionApi, ConstructionApi, MentatResponse},
@@ -33,6 +29,7 @@ use crate::{
     },
 };
 
+/// rosetta construction routes for bitcoind
 #[derive(Clone, Default)]
 pub struct BitcoinConstructionApi;
 

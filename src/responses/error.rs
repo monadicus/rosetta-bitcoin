@@ -1,3 +1,5 @@
+//! a bitcoind error response
+
 // {"jsonrpc":"2.0","error":{"code":-32000,"message":"Odd number of
 // digits"},"id":"1"}
 
@@ -6,10 +8,13 @@ use mentat::{
     serde::Deserialize,
 };
 
+/// the error response structure for bitcoind
 #[derive(Clone, Debug, Deserialize)]
 #[serde(crate = "mentat::serde")]
 pub struct ErrorResponse {
+    /// the error code
     pub code: i32,
+    /// the error message
     pub message: String,
 }
 

@@ -1,3 +1,5 @@
+//! rosetta indexer api implementation for bitcoind using mentat
+
 use mentat::{
     api::{Caller, CallerIndexerApi, IndexerApi, MentatResponse},
     axum::{async_trait, Json},
@@ -8,6 +10,7 @@ use mentat::{
     server::RpcCaller,
 };
 
+/// rosetta indexer routes for bitcoind
 #[derive(Clone, Default)]
 pub struct BitcoinIndexerApi;
 

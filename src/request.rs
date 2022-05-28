@@ -1,8 +1,11 @@
+//! rpc requests
+
 use mentat::{
     serde::Serialize,
     serde_json::{json, Value},
 };
 
+/// helper function to trim `0x` from hashes
 pub fn trim_hash(hash: &str) -> &str {
     if let Some(h) = hash.strip_prefix("0x") {
         h
@@ -11,16 +14,22 @@ pub fn trim_hash(hash: &str) -> &str {
     }
 }
 
+/// the rpc request structure for bitcoind
 #[derive(Debug, Serialize)]
 #[serde(crate = "mentat::serde")]
 pub struct BitcoinJrpc {
+    /// rpc info
     jsonrpc: String,
+    /// id
     id: String,
+    /// endpoint
     method: String,
+    /// json arguments
     params: Vec<Value>,
 }
 
 impl BitcoinJrpc {
+    /// create a new jrpc request for bitcoind
     pub fn new<P: Serialize>(method: &str, params: &[P]) -> Self {
         Self {
             jsonrpc: "2.0".to_string(),
@@ -31,9 +40,12 @@ impl BitcoinJrpc {
     }
 }
 
+/// request object for `account/balance` endpoint
 #[derive(Debug, Serialize)]
 #[serde(crate = "mentat::serde")]
 pub struct ScanObjectsDescriptor {
+    /// account id
     pub desc: String,
+    /// block end range
     pub range: u64,
 }

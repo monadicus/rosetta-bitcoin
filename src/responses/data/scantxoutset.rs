@@ -1,3 +1,5 @@
+//! a bitcoind scantxoutsetresult response
+
 use mentat::{
     identifiers::BlockIdentifier,
     indexmap::IndexMap,
@@ -17,6 +19,8 @@ use mentat::{
 //     height: usize,
 // }
 
+/// a bitcoind scantxoutsetresult response
+#[allow(clippy::missing_docs_in_private_items)]
 #[derive(Clone, Debug, Deserialize)]
 #[serde(crate = "mentat::serde")]
 pub struct ScanTxOutSetResult {

@@ -1,5 +1,9 @@
+//! a bitcoind peerinfo field
+
 use mentat::{indexmap::IndexMap, misc::Peer, serde::Deserialize};
 
+/// a bitcoind peer info field
+#[allow(clippy::missing_docs_in_private_items)]
 #[derive(Clone, Debug, Deserialize)]
 #[serde(crate = "mentat::serde")]
 pub struct PeerInfo {

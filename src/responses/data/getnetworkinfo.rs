@@ -1,3 +1,5 @@
+//! a bitcoind networkinfo field
+
 use mentat::serde::Deserialize;
 
 // #[derive(Clone, Debug, Deserialize)]
@@ -18,7 +20,8 @@ use mentat::serde::Deserialize;
 //     score: usize,
 // }
 
-#[allow(non_snake_case)]
+/// a bitcoind networkinfo field
+#[allow(non_snake_case, clippy::missing_docs_in_private_items)]
 #[derive(Clone, Debug, Deserialize)]
 #[serde(crate = "mentat::serde")]
 pub struct GetNetworkInfo {

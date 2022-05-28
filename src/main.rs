@@ -1,3 +1,8 @@
+//! an example implementation of rosetta for bitcoin using mentat
+
+#![deny(clippy::all, clippy::missing_docs_in_private_items)]
+#![warn(clippy::todo)]
+
 mod call_api;
 mod construction_api;
 mod data_api;
@@ -9,8 +14,8 @@ mod responses;
 
 use mentat::{mentat, server::ServerType};
 
-// caching is broken
-// #[mentat(DefaultCacheInner)]
+/// a rosetta implementation for bitcoin using mentat
+// #[mentat(DefaultCacheInner)] caching is broken
 #[mentat]
 struct MentatBitcoin;
 

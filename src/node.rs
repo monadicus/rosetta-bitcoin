@@ -1,3 +1,5 @@
+//! the info and logic needed to run the bitcoind node
+
 use std::{path::PathBuf, process::Command, str::FromStr};
 
 use mentat::{
@@ -7,11 +9,15 @@ use mentat::{
     serde::{Deserialize, Serialize},
 };
 
+/// configuration information/logic for the bitcoind node
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(crate = "mentat::serde")]
 pub struct NodeConfig {
+    /// where to store blocks and other data
     data_dir: PathBuf,
+    /// the username to set on bitcoind
     user: String,
+    /// the password to set on bitcoind
     pass: String,
 }
 
