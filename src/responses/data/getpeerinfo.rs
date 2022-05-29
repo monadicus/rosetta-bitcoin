@@ -51,9 +51,10 @@ impl From<PeerInfo> for Peer {
             metadata: {
                 let mut map = IndexMap::new();
                 map.insert("addr".to_string(), peer.addr.into());
-                if let Some(s) = peer.banscore {
-                    map.insert("banscore".to_string(), s.into());
-                }
+                map.insert(
+                    "banscore".to_string(),
+                    peer.banscore.unwrap_or_default().into(),
+                );
                 map.extend([
                     ("lastrecv".to_string(), peer.lastrecv.into()),
                     ("lastsend".to_string(), peer.lastsend.into()),
