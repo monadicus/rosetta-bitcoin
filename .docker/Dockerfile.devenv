@@ -2,7 +2,13 @@ FROM rust:latest
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt update \
-    && apt install -y build-essential git libssl-dev
+    && apt install -y build-essential clang cmake git libssl-dev
+
+RUN git clone https://github.com/rui314/mold.git \
+    && cd mold \
+    && git checkout v1.2.1 \
+    && make -j$(nproc) CXX=clang++ \
+    && make install
 
 ENV ARCH=x86_64
 ENV BITCOIN_VERSION=22.0
@@ -13,6 +19,11 @@ RUN wget https://bitcoin.org/bin/bitcoin-core-$BITCOIN_VERSION/bitcoin-$BITCOIN_
 
 RUN useradd -s /bin/bash -m vscode \
     && groupadd docker && usermod -aG docker vscode
+
+USER vscode
+
+RUN cargo install sccache
+ENV RUSTC_WRAPPER=/usr/local/cargo/bin/sccache
 
 EXPOSE 4032/tcp
 EXPOSE 4132/tcp
