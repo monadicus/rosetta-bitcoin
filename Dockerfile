@@ -7,7 +7,7 @@ WORKDIR /app
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt update \
-    && apt install -y build-essential libssl-dev
+    && apt install -y wget
 
 ENV ARCH=x86_64
 ENV BITCOIN_VERSION=22.0
@@ -34,7 +34,7 @@ ENV PATH=/root/.cargo/bin:$PATH
 RUN git clone -b $BRANCH https://github.com/monadicus/rosetta-bitcoin.git \
     && cd rosetta-bitcoin \
     && cargo build --profile release-docker \
-    && mv ./target/release/rosetta-bitcoin /app/server \
+    && mv ./target/release-docker/rosetta-bitcoin /app/server \
     && mv ./docker.conf.toml /app/conf.toml
 
 ## Build Final Image
@@ -42,7 +42,7 @@ FROM debian:buster-slim
 
 ENV ROCKET_ENV "production"
 
-RUN apt-get update && apt-get install -y git
+RUN apt-get update && apt-get install -y git libssl-dev
 
 RUN mkdir -p /app \
     && chown -R nobody:nogroup /app \
