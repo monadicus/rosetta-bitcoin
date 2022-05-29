@@ -1,5 +1,0 @@
-rd_enabled = true
-fleet_id = "d061a547-c2e7-4446-8070-2b2be00ca195"
-
-[build]
-sccache = "C:\\Users\\jonat\\.cargo\\bin\\sccache.exe"
