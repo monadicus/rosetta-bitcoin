@@ -2,11 +2,9 @@
 
 use mentat::{
     api::{Caller, CallerIndexerApi, IndexerApi, MentatResponse},
-    axum::{async_trait, Json},
-    errors::*,
+    axum::async_trait,
     requests::*,
     responses::*,
-    serde_json,
     server::RpcCaller,
 };
 
@@ -22,45 +20,18 @@ impl IndexerApi for BitcoinIndexerApi {
     async fn events_blocks(
         &self,
         _caller: Caller,
-        data: EventsBlocksRequest,
-        rpc_caller: RpcCaller,
+        _data: EventsBlocksRequest,
+        _rpc_caller: RpcCaller,
     ) -> MentatResponse<EventsBlocksResponse> {
-        let resp = rpc_caller
-            .client
-            .post(rpc_caller.node_rpc_url)
-            .json(&data)
-            .send()
-            .await
-            .merr(|e| {
-                serde_json::from_str(&e.to_string())
-                    .unwrap_or_else(|e| format!("unhandled rosetta-bitcoin error: {}", e))
-            })?;
-
-        let out = resp.text().await?;
-        match serde_json::from_str(&out) {
-            Ok(o) => Ok(Json(o)),
-            Err(_) => Err(MentatError::Internal(serde_json::from_str(&out)?)),
-        }
+        todo!()
     }
 
     async fn search_transactions(
         &self,
         _caller: Caller,
-        data: SearchTransactionsRequest,
-        rpc_caller: RpcCaller,
+        _data: SearchTransactionsRequest,
+        _rpc_caller: RpcCaller,
     ) -> MentatResponse<SearchTransactionsResponse> {
-        let resp = rpc_caller
-            .client
-            .post(rpc_caller.node_rpc_url)
-            .json(&data)
-            .send()
-            .await
-            .merr(|e| {
-                serde_json::from_str(&e.to_string())
-                    .unwrap_or_else(|e| format!("unhandled rosetta-bitcoin error: {}", e))
-            })?;
-
-        let out = resp.text().await?;
-        Ok(Json(serde_json::from_str(&out)?))
+        todo!()
     }
 }
