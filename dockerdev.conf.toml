@@ -1,0 +1,13 @@
+address = '0.0.0.0'
+port = 8080
+mode = 'ONLINE'
+node_path = '/usr/bin/bitcoind'
+network = 'TESTNET'
+secure_http = false
+node_address = '0.0.0.0'
+node_rpc_port = 4032
+
+[custom]
+data_dir = './data'
+user = 'pass'
+pass = 'pass'
