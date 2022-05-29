@@ -52,10 +52,7 @@ impl NodeConf for NodeConfig {
             &format!("-rpcuser={}", config.custom.as_ref().unwrap().user),
             &format!("-rpcpassword={}", config.custom.as_ref().unwrap().pass),
             "-txindex=1",
-            &format!(
-                "--datadir={}",
-                config.custom.as_ref().unwrap().data_dir.display()
-            ),
+            &format!("--datadir={}", config.custom.as_ref().unwrap().data_dir.display()),
         ]);
         command
     }

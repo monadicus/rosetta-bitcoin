@@ -44,10 +44,8 @@ ENV ROCKET_ENV "production"
 
 RUN apt-get update && apt-get install -y git libssl-dev
 
-RUN mkdir -p /app \
-    && chown -R nobody:nogroup /app \
-    && mkdir -p /data \
-    && chown -R nobody:nogroup /data
+RUN mkdir -p /app/data \
+    && chown -R nobody:nogroup /app 
 
 WORKDIR /app
 
