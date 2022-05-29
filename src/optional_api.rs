@@ -30,7 +30,10 @@ impl OptionalApi for BitcoinOptionalApi {
             Ok(Some(NodeConnections::Offline))
         } else {
             let result = rpc_caller
-                .rpc_call::<Response<common::GetNetworkInfo>>(BitcoinJrpc::new("getnetworkinfo", &[] as &[()]))
+                .rpc_call::<Response<common::GetNetworkInfo>>(BitcoinJrpc::new(
+                    "getnetworkinfo",
+                    &[] as &[()],
+                ))
                 .await?;
 
             Ok(Some(NodeConnections::Online {
