@@ -26,7 +26,13 @@ RUN mkdir -p /app \
 WORKDIR /app
 
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get update && apt-get install -y curl clang gcc git
+RUN apt-get update && apt-get install -y curl clang cmake gcc git
+
+RUN git clone https://github.com/rui314/mold.git \
+    && cd mold \
+    && git checkout v1.2.1 \
+    && make -j$(nproc) CXX=clang++ \
+    && make install
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH=/root/.cargo/bin:$PATH
@@ -42,7 +48,7 @@ FROM debian:buster-slim
 
 ENV ROCKET_ENV "production"
 
-RUN apt-get update && apt-get install -y git libssl-dev
+RUN apt-get update && apt-get install -y libssl-dev
 
 RUN mkdir -p /app/data \
     && chown -R nobody:nogroup /app 
