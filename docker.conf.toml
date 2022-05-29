@@ -8,6 +8,7 @@ node_address = '0.0.0.0'
 node_rpc_port = 4032
 
 [custom]
-data_dir = ''
-user = ''
-pass = ''
+data_dir = './data'
+user = 'pass'
+pass = 'pass'
+
