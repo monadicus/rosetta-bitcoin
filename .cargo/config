@@ -3,8 +3,8 @@
 rustflags = [
 	# https://github.com/rui314/mold mold is a modern linker that's way faster.
 	# if you don't have mold either install it or comment the following lines.
-    "-C",
-	"link-arg=-fuse-ld=/usr/local/bin/mold"
+    # "-C",
+	# "link-arg=-fuse-ld=/usr/local/bin/mold"
 ]
 linker = 'clang'
 
