@@ -26,19 +26,14 @@ RUN mkdir -p /app \
 WORKDIR /app
 
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get update && apt-get install -y curl clang cmake gcc git
-
-RUN git clone https://github.com/rui314/mold.git \
-    && cd mold \
-    && git checkout v1.2.1 \
-    && make -j$(nproc) CXX=clang++ \
-    && make install
+RUN apt-get update && apt-get install -y curl clang git
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH=/root/.cargo/bin:$PATH
 
 RUN git clone -b $BRANCH https://github.com/monadicus/rosetta-bitcoin.git \
     && cd rosetta-bitcoin \
+    && rm -rf .cargo \
     && cargo build --profile release-docker \
     && mv ./target/release-docker/rosetta-bitcoin /app/server \
     && mv ./docker.conf.toml /app/conf.toml
