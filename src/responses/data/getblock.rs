@@ -27,7 +27,7 @@ pub struct GetBlockResponse {
     pub difficulty: f64,
     // chainwork: String,
     // nTx: usize,
-    pub previousblockhash: String,
+    pub previousblockhash: Option<String>,
     // nextblockhash: String,
     // strippedsize: usize,
     pub size: usize,
@@ -55,11 +55,11 @@ impl GetBlockResponse {
                 .collect::<Result<_, _>>()?,
                 block_identifier: BlockIdentifier {
                     index: self.height,
-                    hash: self.hash,
+                    hash: self.hash.clone(),
                 },
                 parent_block_identifier: BlockIdentifier {
                     index: self.height.saturating_sub(1),
-                    hash: self.previousblockhash,
+                    hash: self.previousblockhash.unwrap_or(self.hash),
                 },
                 timestamp: self.time * 1000,
                 metadata: [

@@ -118,7 +118,7 @@ impl DataApi for BitcoinDataApi {
         let genesis_block = rpc_caller
             .rpc_call::<Response<GetBlockResponse>>(BitcoinJrpc::new(
                 "getblock",
-                &[json!(current_hash), json!(2)],
+                &[json!(genesis_hash), json!(2)],
             ))
             .await?;
 
