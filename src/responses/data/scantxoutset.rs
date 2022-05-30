@@ -32,15 +32,16 @@ pub struct ScanTxOutSetResult {
     total_amount: f64,
 }
 
-impl From<ScanTxOutSetResult> for AccountBalanceResponse {
-    fn from(utxo: ScanTxOutSetResult) -> Self {
+impl ScanTxOutSetResult {
+    /// convert scantxoutset response into account/balance response
+    pub fn into_balance(self, id: Option<BlockIdentifier>) -> AccountBalanceResponse {
         AccountBalanceResponse {
-            block_identifier: BlockIdentifier {
-                index: utxo.height,
-                hash: utxo.bestblock,
-            },
+            block_identifier: id.unwrap_or(BlockIdentifier {
+                index: self.height,
+                hash: self.bestblock,
+            }),
             balances: vec![Amount {
-                value: (utxo.total_amount * 100000000.0).to_string(),
+                value: (self.total_amount * 100000000.0).to_string(),
                 currency: Currency {
                     symbol: String::from("BTC"),
                     decimals: 8,

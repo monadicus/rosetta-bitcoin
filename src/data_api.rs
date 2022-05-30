@@ -4,7 +4,7 @@ use mentat::{
     api::{Caller, CallerDataApi, DataApi, MentatResponse},
     axum::{async_trait, Json},
     errors::*,
-    identifiers::{BlockIdentifier, TransactionIdentifier},
+    identifiers::{BlockIdentifier, PartialBlockIdentifier, TransactionIdentifier},
     indexmap::IndexMap,
     misc::{OperationStatus, Version},
     models::Allow,
@@ -149,27 +149,42 @@ impl DataApi for BitcoinDataApi {
         data: AccountBalanceRequest,
         rpc_caller: RpcCaller,
     ) -> MentatResponse<AccountBalanceResponse> {
-        let args = if let Some(id) = data.block_identifier {
-            let range = if let Some(i) = id.index {
-                i
-            } else if let Some(hash) = id.hash {
-                rpc_caller
+        let id = match data.block_identifier {
+            Some(PartialBlockIdentifier {
+                index: Some(index),
+                hash: Some(hash),
+            }) => Some(BlockIdentifier { index, hash }),
+            Some(PartialBlockIdentifier {
+                index: Some(index),
+                hash: None,
+            }) => Some(BlockIdentifier {
+                index,
+                hash: rpc_caller
+                    .rpc_call::<Response<String>>(BitcoinJrpc::new("getblockhash", &[index]))
+                    .await?,
+            }),
+            Some(PartialBlockIdentifier {
+                index: None,
+                hash: Some(hash),
+            }) => Some(BlockIdentifier {
+                index: rpc_caller
                     .rpc_call::<Response<GetBlockResponse>>(BitcoinJrpc::new(
                         "getblock",
                         &[json!(trim_hash(&hash)), json!(2u32)],
                     ))
                     .await?
-                    .height
-            } else {
-                rpc_caller
-                    .rpc_call::<Response<u64>>(BitcoinJrpc::new("getblockcount", &[] as &[u8]))
-                    .await?
-            };
+                    .height,
+                hash,
+            }),
+            _ => None,
+        };
+
+        let args = if let Some(id) = &id {
             vec![
                 json!("start"),
                 json!(vec!(json!(ScanObjectsDescriptor {
                     desc: format!("addr({})", trim_hash(&data.account_identifier.address)),
-                    range,
+                    range: id.index,
                 }))),
             ]
         } else {
@@ -182,12 +197,11 @@ impl DataApi for BitcoinDataApi {
             ]
         };
 
-        dbg!(&args);
         Ok(Json(
             rpc_caller
                 .rpc_call::<Response<ScanTxOutSetResult>>(BitcoinJrpc::new("scantxoutset", &args))
                 .await?
-                .into(),
+                .into_balance(id),
         ))
     }
 
