@@ -33,7 +33,6 @@ ENV PATH=/root/.cargo/bin:$PATH
 
 RUN git clone -b $BRANCH https://github.com/monadicus/rosetta-bitcoin.git \
     && cd rosetta-bitcoin \
-    && rm -rf .cargo \
     && cargo build --profile release-docker \
     && mv ./target/release-docker/rosetta-bitcoin /app/server \
     && mv ./docker.conf.toml /app/conf.toml
