@@ -1,3 +1,4 @@
 /target
+/data
 conf.toml
 regtest.toml
