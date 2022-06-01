@@ -204,14 +204,14 @@ impl DataApi for BitcoinDataApi {
         ))
     }
 
-    async fn account_coins(
-        &self,
-        _caller: Caller,
-        _data: AccountCoinsRequest,
-        _rpc_caller: RpcCaller,
-    ) -> MentatResponse<AccountCoinsResponse> {
-        todo!()
-    }
+    // async fn account_coins(
+    //     &self,
+    //     _caller: Caller,
+    //     _data: AccountCoinsRequest,
+    //     _rpc_caller: RpcCaller,
+    // ) -> MentatResponse<AccountCoinsResponse> {
+    //     todo!()
+    // }
 
     async fn block(
         &self,
