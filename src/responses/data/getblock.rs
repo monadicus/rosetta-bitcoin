@@ -2,8 +2,13 @@
 
 use futures::future::join_all;
 use mentat::{
-    api::MentatResponse, axum::Json, errors::*, identifiers::BlockIdentifier, models::Block,
-    responses::BlockResponse, server::RpcCaller,
+    api::MentatResponse,
+    axum::Json,
+    errors::*,
+    identifiers::BlockIdentifier,
+    models::Block,
+    responses::BlockResponse,
+    server::RpcCaller,
 };
 
 use super::*;
@@ -37,7 +42,8 @@ pub struct GetBlockResponse {
 
 impl GetBlockResponse {
     /// convert GetBlock into a rosetta `BlockResponse`.
-    /// makes calls to the bitcoind node during the conversion to get transaction info
+    /// makes calls to the bitcoind node during the conversion to get
+    /// transaction info
     pub async fn into_block_response(
         self,
         rpc_caller: &RpcCaller,
