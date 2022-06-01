@@ -4,7 +4,7 @@
 // digits"},"id":"1"}
 
 use mentat::{
-    errors::{ApiError, MentatError, Result},
+    errors::{MentatError, Result},
     serde::Deserialize,
 };
 
@@ -20,7 +20,8 @@ pub struct ErrorResponse {
 
 impl<R> From<ErrorResponse> for Result<R> {
     fn from(response: ErrorResponse) -> Self {
-        Err(MentatError::Internal(ApiError {
+        Err(MentatError {
+            status_code: 500,
             code: 500,
             message: "Bitcoin JsonRPC Error.".to_string(),
             description: None,
@@ -30,6 +31,6 @@ impl<R> From<ErrorResponse> for Result<R> {
                 ("message".to_string(), response.message.into()),
             ]
             .into(),
-        }))
+        })
     }
 }

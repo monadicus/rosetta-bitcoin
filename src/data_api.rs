@@ -52,46 +52,45 @@ impl DataApi for BitcoinDataApi {
         _data: NetworkRequest,
         rpc_caller: RpcCaller,
     ) -> MentatResponse<NetworkOptionsResponse> {
-        let node_version = rpc_caller
-            .rpc_call::<Response<GetNetworkInfo>>(BitcoinJrpc::new("getnetworkinfo", &[] as &[u8]))
-            .await?
-            .version;
-
         Ok(Json(NetworkOptionsResponse {
             version: Version {
                 // TODO: fetch this
                 // This is just the current Rosetta version for now
                 rosetta_version: "1.4.10".to_owned(),
-                node_version: node_version.to_string(),
+                node_version: rpc_caller
+                    .rpc_call::<Response<GetNetworkInfo>>(BitcoinJrpc::new(
+                        "getnetworkinfo",
+                        &[] as &[u8],
+                    ))
+                    .await?
+                    .version()
+                    .to_string(),
                 middleware_version: Some(env!("CARGO_PKG_VERSION").to_owned()),
                 metadata: IndexMap::new(),
             },
             allow: Allow {
-                operation_statuses: vec![OperationStatus {
-                    status: "SUCCESS".to_owned(),
-                    successful: true,
-                }],
+                operation_statuses: vec![
+                    OperationStatus {
+                        status: "SUCCESS".to_owned(),
+                        successful: true,
+                    },
+                    OperationStatus {
+                        status: "SKIPPED".to_owned(),
+                        successful: false,
+                    },
+                ],
                 operation_types: vec![
-                    "COINBASE".to_owned(),
                     "INPUT".to_owned(),
                     "OUTPUT".to_owned(),
+                    "COINBASE".to_owned(),
                 ],
-                errors: vec![
-                    MentatError::not_implemented::<u8>()
-                        .expect_err("creating an error somehow resulted in an Ok"),
-                    MentatError::wrong_network::<_, u8>("payload")
-                        .expect_err("creating an error somehow resulted in an Ok"),
-                    MentatError::invalid_account_format::<u8>()
-                        .expect_err("creating an error somehow resulted in an Ok"),
-                    MentatError::unable_to_find_transaction::<u8>("hash")
-                        .expect_err("creating an error somehow resulted in an Ok"),
-                ],
+                errors: MentatError::all_errors(),
                 historical_balance_lookup: true,
                 timestamp_start_index: None,
                 // TODO: populate this when `/call` is populated.
                 call_methods: None,
                 balance_exemptions: None,
-                mempool_coins: true,
+                mempool_coins: false,
             },
         }))
     }
@@ -268,7 +267,7 @@ impl DataApi for BitcoinDataApi {
                 transaction: tx.into_transaction(i, &rpc_caller).await?,
             }))
         } else {
-            MentatError::unable_to_find_transaction(&data.transaction_identifier.hash)
+            MentatError::transaction_not_found(Some(&data.transaction_identifier.hash))
         }
     }
 
@@ -318,7 +317,7 @@ impl DataApi for BitcoinDataApi {
                 metadata: IndexMap::new(),
             }))
         } else {
-            MentatError::unable_to_find_transaction(&data.transaction_identifier.hash)
+            MentatError::transaction_not_found(Some(&data.transaction_identifier.hash))
         }
     }
 }
