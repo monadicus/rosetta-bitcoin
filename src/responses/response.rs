@@ -1,3 +1,5 @@
+//! a bitcoind response
+
 use std::fmt::Debug;
 
 use mentat::{
@@ -10,10 +12,13 @@ use mentat::{
 use super::ErrorResponse;
 use crate::request::BitcoinJrpc;
 
+/// the response structure for bitcoind
 #[derive(Clone, Debug, Deserialize)]
 #[serde(crate = "mentat::serde")]
 pub struct Response<R> {
+    /// a successful bitcoind response
     pub result: Option<R>,
+    /// a bitcoind error response
     pub error: Option<ErrorResponse>,
 }
 

@@ -1,3 +1,5 @@
+//! a bitcoind networkinfo field
+
 use mentat::serde::Deserialize;
 
 // #[derive(Clone, Debug, Deserialize)]
@@ -18,12 +20,13 @@ use mentat::serde::Deserialize;
 //     score: usize,
 // }
 
-#[allow(non_snake_case)]
+/// a bitcoind networkinfo field
+#[allow(non_snake_case, clippy::missing_docs_in_private_items)]
 #[derive(Clone, Debug, Deserialize)]
 #[serde(crate = "mentat::serde")]
 pub struct GetNetworkInfo {
-    pub version: usize,
-    // subversion: String,
+    // pub version: usize,
+    pub subversion: String,
     // protocol: usize,
     // localservices: String,
     // localservicesnames: Vec<String>,
@@ -38,4 +41,15 @@ pub struct GetNetworkInfo {
     // incrementalfee: usize,
     // localaddresses: Vec<LocalAddress>,
     // warnings: String,
+}
+
+impl GetNetworkInfo {
+    /// parse the node version from the network info
+    pub fn version(&self) -> &str {
+        self.subversion
+            .strip_prefix("/Satoshi:")
+            .unwrap()
+            .strip_suffix('/')
+            .unwrap()
+    }
 }

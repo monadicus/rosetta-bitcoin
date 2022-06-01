@@ -1,8 +1,10 @@
+//! rosetta data api implementation for bitcoind using mentat
+
 use mentat::{
     api::{Caller, CallerDataApi, DataApi, MentatResponse},
     axum::{async_trait, Json},
     errors::*,
-    identifiers::{BlockIdentifier, TransactionIdentifier},
+    identifiers::{BlockIdentifier, PartialBlockIdentifier, TransactionIdentifier},
     indexmap::IndexMap,
     misc::{OperationStatus, Version},
     models::Allow,
@@ -14,13 +16,10 @@ use mentat::{
 
 use crate::{
     request::{trim_hash, BitcoinJrpc, ScanObjectsDescriptor},
-    responses::{
-        common::{BitcoinTransaction, GetNetworkInfo, PeerInfo, ScanTxOutSetResult},
-        data::*,
-        Response,
-    },
+    responses::{common::BitcoinTransaction, data::*, Response},
 };
 
+/// rosetta data routes for bitcoind
 #[derive(Clone, Default)]
 pub struct BitcoinDataApi;
 
@@ -53,46 +52,45 @@ impl DataApi for BitcoinDataApi {
         _data: NetworkRequest,
         rpc_caller: RpcCaller,
     ) -> MentatResponse<NetworkOptionsResponse> {
-        let node_version = rpc_caller
-            .rpc_call::<Response<GetNetworkInfo>>(BitcoinJrpc::new("getnetworkinfo", &[] as &[u8]))
-            .await?
-            .version;
-
         Ok(Json(NetworkOptionsResponse {
             version: Version {
                 // TODO: fetch this
                 // This is just the current Rosetta version for now
                 rosetta_version: "1.4.10".to_owned(),
-                node_version: node_version.to_string(),
+                node_version: rpc_caller
+                    .rpc_call::<Response<GetNetworkInfo>>(BitcoinJrpc::new(
+                        "getnetworkinfo",
+                        &[] as &[u8],
+                    ))
+                    .await?
+                    .version()
+                    .to_string(),
                 middleware_version: Some(env!("CARGO_PKG_VERSION").to_owned()),
                 metadata: IndexMap::new(),
             },
             allow: Allow {
-                operation_statuses: vec![OperationStatus {
-                    status: "SUCCESS".to_owned(),
-                    successful: true,
-                }],
+                operation_statuses: vec![
+                    OperationStatus {
+                        status: "SUCCESS".to_owned(),
+                        successful: true,
+                    },
+                    OperationStatus {
+                        status: "SKIPPED".to_owned(),
+                        successful: false,
+                    },
+                ],
                 operation_types: vec![
-                    "COINBASE".to_owned(),
                     "INPUT".to_owned(),
                     "OUTPUT".to_owned(),
+                    "COINBASE".to_owned(),
                 ],
-                errors: vec![
-                    MentatError::not_implemented::<u8>()
-                        .expect_err("creating an error somehow resulted in an Ok"),
-                    MentatError::wrong_network::<_, u8>("payload")
-                        .expect_err("creating an error somehow resulted in an Ok"),
-                    MentatError::invalid_account_format::<u8>()
-                        .expect_err("creating an error somehow resulted in an Ok"),
-                    MentatError::unable_to_find_transaction::<u8>("hash")
-                        .expect_err("creating an error somehow resulted in an Ok"),
-                ],
+                errors: MentatError::all_errors(),
                 historical_balance_lookup: true,
                 timestamp_start_index: None,
                 // TODO: populate this when `/call` is populated.
                 call_methods: None,
                 balance_exemptions: None,
-                mempool_coins: true,
+                mempool_coins: false,
             },
         }))
     }
@@ -119,7 +117,7 @@ impl DataApi for BitcoinDataApi {
         let genesis_block = rpc_caller
             .rpc_call::<Response<GetBlockResponse>>(BitcoinJrpc::new(
                 "getblock",
-                &[json!(current_hash), json!(2)],
+                &[json!(genesis_hash), json!(2)],
             ))
             .await?;
 
@@ -150,46 +148,67 @@ impl DataApi for BitcoinDataApi {
         data: AccountBalanceRequest,
         rpc_caller: RpcCaller,
     ) -> MentatResponse<AccountBalanceResponse> {
-        let args = if let Some(id) = data.block_identifier {
-            let range = if let Some(i) = id.index {
-                i
-            } else if let Some(hash) = id.hash {
-                rpc_caller
+        let id = match data.block_identifier {
+            Some(PartialBlockIdentifier {
+                index: Some(index),
+                hash: Some(hash),
+            }) => Some(BlockIdentifier { index, hash }),
+            Some(PartialBlockIdentifier {
+                index: Some(index),
+                hash: None,
+            }) => Some(BlockIdentifier {
+                index,
+                hash: rpc_caller
+                    .rpc_call::<Response<String>>(BitcoinJrpc::new("getblockhash", &[index]))
+                    .await?,
+            }),
+            Some(PartialBlockIdentifier {
+                index: None,
+                hash: Some(hash),
+            }) => Some(BlockIdentifier {
+                index: rpc_caller
                     .rpc_call::<Response<GetBlockResponse>>(BitcoinJrpc::new(
                         "getblock",
-                        &[json!(hash), json!(2u32)],
+                        &[json!(trim_hash(&hash)), json!(2u32)],
                     ))
                     .await?
-                    .height
-            } else {
-                rpc_caller
-                    .rpc_call::<Response<u64>>(BitcoinJrpc::new("getblockcount", &[] as &[u8]))
-                    .await?
-            };
+                    .height,
+                hash,
+            }),
+            _ => None,
+        };
+
+        let args = if let Some(id) = &id {
             vec![
                 json!("start"),
-                json!(ScanObjectsDescriptor {
-                    desc: data.account_identifier.address,
-                    range,
-                }),
+                json!(vec!(json!(ScanObjectsDescriptor {
+                    desc: format!("addr({})", trim_hash(&data.account_identifier.address)),
+                    range: id.index,
+                }))),
             ]
         } else {
-            vec![json!("start"), json!(data.account_identifier.address)]
+            vec![
+                json!("start"),
+                json!(vec!(json!(format!(
+                    "addr({})",
+                    trim_hash(&data.account_identifier.address)
+                )))),
+            ]
         };
 
         Ok(Json(
             rpc_caller
                 .rpc_call::<Response<ScanTxOutSetResult>>(BitcoinJrpc::new("scantxoutset", &args))
                 .await?
-                .into(),
+                .into_balance(id),
         ))
     }
 
     // async fn account_coins(
     //     &self,
     //     _caller: Caller,
-    //     data: AccountCoinsRequest,
-    //     rpc_caller: RpcCaller,
+    //     _data: AccountCoinsRequest,
+    //     _rpc_caller: RpcCaller,
     // ) -> MentatResponse<AccountCoinsResponse> {
     //     todo!()
     // }
@@ -248,7 +267,7 @@ impl DataApi for BitcoinDataApi {
                 transaction: tx.into_transaction(i, &rpc_caller).await?,
             }))
         } else {
-            MentatError::unable_to_find_transaction(&data.transaction_identifier.hash)
+            MentatError::transaction_not_found(Some(&data.transaction_identifier.hash))
         }
     }
 
@@ -298,7 +317,7 @@ impl DataApi for BitcoinDataApi {
                 metadata: IndexMap::new(),
             }))
         } else {
-            MentatError::unable_to_find_transaction(&data.transaction_identifier.hash)
+            MentatError::transaction_not_found(Some(&data.transaction_identifier.hash))
         }
     }
 }

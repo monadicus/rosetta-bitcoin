@@ -1,3 +1,5 @@
+//! the info and logic needed to run the bitcoind node
+
 use std::{path::PathBuf, process::Command, str::FromStr};
 
 use mentat::{
@@ -7,11 +9,15 @@ use mentat::{
     serde::{Deserialize, Serialize},
 };
 
+/// configuration information/logic for the bitcoind node
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(crate = "mentat::serde")]
 pub struct NodeConfig {
+    /// where to store blocks and other data
     data_dir: PathBuf,
+    /// the username to set on bitcoind
     user: String,
+    /// the password to set on bitcoind
     pass: String,
 }
 
@@ -23,8 +29,8 @@ impl NodeConf for NodeConfig {
         let url = format!(
             "{}://{}:{}@{}:{}",
             if conf.secure_http { "https" } else { "http" },
-            conf.custom.user,
-            conf.custom.pass,
+            conf.custom.as_ref().unwrap().user,
+            conf.custom.as_ref().unwrap().pass,
             conf.node_address,
             conf.node_rpc_port
         );
@@ -43,10 +49,13 @@ impl NodeConf for NodeConfig {
             // Locally-run instances may remove rpcuser to use cookie-based auth, or may be
             // replaced with rpcauth. Please see share/rpcauth for rpcauth auth generation.`
             &format!("-rpcport={}", config.node_rpc_port),
-            &format!("-rpcuser={}", config.custom.user),
-            &format!("-rpcpassword={}", config.custom.pass),
+            &format!("-rpcuser={}", config.custom.as_ref().unwrap().user),
+            &format!("-rpcpassword={}", config.custom.as_ref().unwrap().pass),
             "-txindex=1",
-            &format!("--datadir={}", config.custom.data_dir.display()),
+            &format!(
+                "--datadir={}",
+                config.custom.as_ref().unwrap().data_dir.display()
+            ),
         ]);
         command
     }

@@ -1,3 +1,5 @@
+//! a bitcoind getblock response
+
 use futures::future::join_all;
 use mentat::{
     api::MentatResponse,
@@ -12,7 +14,8 @@ use mentat::{
 use super::*;
 use crate::responses::common::BitcoinTransaction;
 
-#[allow(non_snake_case)]
+/// a bitcoind getblock response
+#[allow(non_snake_case, clippy::missing_docs_in_private_items)]
 #[derive(Debug, Deserialize)]
 #[serde(crate = "mentat::serde")]
 pub struct GetBlockResponse {
@@ -29,7 +32,7 @@ pub struct GetBlockResponse {
     pub difficulty: f64,
     // chainwork: String,
     // nTx: usize,
-    pub previousblockhash: String,
+    pub previousblockhash: Option<String>,
     // nextblockhash: String,
     // strippedsize: usize,
     pub size: usize,
@@ -38,6 +41,9 @@ pub struct GetBlockResponse {
 }
 
 impl GetBlockResponse {
+    /// convert GetBlock into a rosetta `BlockResponse`.
+    /// makes calls to the bitcoind node during the conversion to get
+    /// transaction info
     pub async fn into_block_response(
         self,
         rpc_caller: &RpcCaller,
@@ -55,11 +61,11 @@ impl GetBlockResponse {
                 .collect::<Result<_, _>>()?,
                 block_identifier: BlockIdentifier {
                     index: self.height,
-                    hash: self.hash,
+                    hash: self.hash.clone(),
                 },
                 parent_block_identifier: BlockIdentifier {
                     index: self.height.saturating_sub(1),
-                    hash: self.previousblockhash,
+                    hash: self.previousblockhash.unwrap_or(self.hash),
                 },
                 timestamp: self.time * 1000,
                 metadata: [

@@ -1,3 +1,5 @@
+//! a bitcoind transaction
+
 use std::convert::TryFrom;
 
 use bitcoin::{hashes::hex::FromHex, Script, Transaction as BTCTransaction, TxIn, TxOut};
@@ -18,6 +20,8 @@ use crate::{
     responses::Response,
 };
 
+/// a bitcoind scriptsig field
+#[allow(clippy::missing_docs_in_private_items)]
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(crate = "mentat::serde")]
 pub struct BitcoinScriptSig {
@@ -25,7 +29,8 @@ pub struct BitcoinScriptSig {
     hex: String,
 }
 
-#[allow(non_snake_case)]
+/// a bitcoind vin field
+#[allow(non_snake_case, clippy::missing_docs_in_private_items)]
 #[derive(Clone, Debug, Deserialize)]
 #[serde(crate = "mentat::serde")]
 pub struct BitcoinVin {
@@ -38,6 +43,8 @@ pub struct BitcoinVin {
 }
 
 impl BitcoinVin {
+    /// converts a bitcoind vin field into a rosetta Operation.
+    /// makes calls to the endpoint to get transaction info
     async fn into_operation(
         self,
         trans_idx: usize,
@@ -117,6 +124,8 @@ impl BitcoinVin {
     }
 }
 
+/// a bitcoind scriptpubkey field
+#[allow(clippy::missing_docs_in_private_items)]
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(crate = "mentat::serde")]
 pub struct BitcoinScriptPubKey {
@@ -126,7 +135,8 @@ pub struct BitcoinScriptPubKey {
     pub _type: String,
 }
 
-#[allow(non_snake_case)]
+/// a bitcoind vout field
+#[allow(non_snake_case, clippy::missing_docs_in_private_items)]
 #[derive(Clone, Debug, Deserialize)]
 #[serde(crate = "mentat::serde")]
 pub struct BitcoinVout {
@@ -136,6 +146,7 @@ pub struct BitcoinVout {
 }
 
 impl BitcoinVout {
+    /// converts a bitcoind vout field into a rosetta operation
     pub fn into_operation(self, index: u64, hash: &str) -> Operation {
         Operation {
             operation_identifier: OperationIdentifier {
@@ -174,6 +185,8 @@ impl BitcoinVout {
     }
 }
 
+/// a bitcoind transaction field
+#[allow(clippy::missing_docs_in_private_items)]
 #[derive(Clone, Debug, Deserialize)]
 #[serde(crate = "mentat::serde")]
 pub struct BitcoinTransaction {
@@ -190,6 +203,7 @@ pub struct BitcoinTransaction {
 }
 
 impl BitcoinTransaction {
+    /// convert a bitcoind transaction field into a rosetta transaction
     pub async fn into_transaction(
         self,
         index: usize,

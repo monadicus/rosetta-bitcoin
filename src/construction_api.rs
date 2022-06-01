@@ -1,3 +1,5 @@
+//! rosetta construction api implementation for bitcoind using mentat
+
 use std::str::FromStr;
 
 use bitcoin::{
@@ -33,6 +35,7 @@ use crate::{
     },
 };
 
+/// rosetta construction routes for bitcoind
 #[derive(Clone, Default)]
 pub struct BitcoinConstructionApi;
 
