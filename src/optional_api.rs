@@ -7,7 +7,7 @@ use mentat::{
     server::RpcCaller,
 };
 
-use crate::{request::BitcoinJrpc, responses::*};
+use crate::{request::BitcoinJrpc, responses::{*, data::GetNetworkInfo}};
 #[derive(Clone, Default)]
 pub struct BitcoinOptionalApi;
 
@@ -30,7 +30,7 @@ impl OptionalApi for BitcoinOptionalApi {
             Ok(Some(NodeConnections::Offline))
         } else {
             let result = rpc_caller
-                .rpc_call::<Response<common::GetNetworkInfo>>(BitcoinJrpc::new(
+                .rpc_call::<Response<GetNetworkInfo>>(BitcoinJrpc::new(
                     "getnetworkinfo",
                     &[] as &[()],
                 ))
