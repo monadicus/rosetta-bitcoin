@@ -1,3 +1,5 @@
+//! The optional api endpoints for bitcoind.
+
 use mentat::{
     api::OptionalApi,
     axum::async_trait,
@@ -7,7 +9,12 @@ use mentat::{
     server::RpcCaller,
 };
 
-use crate::{request::BitcoinJrpc, responses::{*, data::GetNetworkInfo}};
+use crate::{
+    request::BitcoinJrpc,
+    responses::{data::GetNetworkInfo, *},
+};
+
+/// The optional api endpoints for bitcoind.
 #[derive(Clone, Default)]
 pub struct BitcoinOptionalApi;
 

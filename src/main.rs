@@ -14,6 +14,7 @@ mod responses;
 
 use mentat::{mentat, server::ServerType};
 
+/// The mentat rosetta-bitcoin.
 #[mentat]
 struct MentatBitcoin;
 
