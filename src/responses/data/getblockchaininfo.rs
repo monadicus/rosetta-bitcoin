@@ -7,7 +7,9 @@ use mentat::{identifiers::NetworkIdentifier, responses::NetworkListResponse, ser
 #[derive(Debug, Deserialize)]
 #[serde(crate = "mentat::serde")]
 pub struct GetBlockchainInfoResponse {
-    chain: String,
+    pub blocks: usize,
+    pub chain: String,
+    pub headers: usize,
 }
 
 impl From<GetBlockchainInfoResponse> for NetworkListResponse {

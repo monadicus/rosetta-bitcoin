@@ -1,12 +1,12 @@
 [build]
-[target.x86_64-unknown-linux-gnu]
-rustflags = [
-	# https://github.com/rui314/mold mold is a modern linker that's way faster.
-	# if you have mold uncomment the following lines.
-    # "-C",
-	# "link-arg=-fuse-ld=/usr/local/bin/mold"
-]
-linker = 'clang'
+# https://github.com/rui314/mold mold is a modern linker that's way faster.
+# if you have mold uncomment the following lines.
+# [target.x86_64-unknown-linux-gnu]
+# rustflags = [
+#     "-C",
+#     "link-arg=-fuse-ld=/usr/local/bin/mold"
+# ]
+# linker = 'clang'
 
 [target.x86_64-pc-windows-msvc]
 rustflags = []

@@ -3,7 +3,6 @@
 use mentat::{
     api::{CallApi, Caller, CallerCallApi, MentatResponse},
     axum::{async_trait, Json},
-    indexmap::IndexMap,
     requests::*,
     responses::*,
     serde_json::Value,
@@ -32,7 +31,7 @@ impl CallApi for BitcoinCallApi {
         rpc_caller: RpcCaller,
     ) -> MentatResponse<CallResponse> {
         let result = rpc_caller
-            .rpc_call::<Response<IndexMap<String, Value>>>(BitcoinJrpc::new(
+            .rpc_call::<Response<Value>>(BitcoinJrpc::new(
                 &data.method,
                 &data
                     .parameters

@@ -1,25 +1,59 @@
 //! The optional api endpoints for bitcoind.
 
 use mentat::{
-    api::OptionalApi,
-    axum::async_trait,
-    conf::Mode,
+    api::{Caller, CallerOptionalApi, MentatResponse, OptionalApi},
+    axum::{async_trait, Json},
+    conf::{Mode, NodePid},
     errors::Result,
-    responses::{NodeConnections, NodeNetwork},
+    responses::{HealthCheckResponse, NodeConnections, NodeNetwork, Synced},
     server::RpcCaller,
+    sysinfo::Pid,
 };
 
 use crate::{
     request::BitcoinJrpc,
-    responses::{data::GetNetworkInfo, *},
+    responses::{
+        data::{GetBlockchainInfoResponse, GetNetworkInfo},
+        *,
+    },
 };
 
 /// The optional api endpoints for bitcoind.
 #[derive(Clone, Default)]
 pub struct BitcoinOptionalApi;
 
+// TODO: this is a clunky design pattern
+#[async_trait]
+impl CallerOptionalApi for BitcoinOptionalApi {
+    async fn call_health(
+        &self,
+        caller: Caller,
+        mode: &Mode,
+        rpc_caller: RpcCaller,
+        server_pid: Pid,
+        node_pid: NodePid,
+    ) -> MentatResponse<HealthCheckResponse> {
+        self.health(caller, mode, rpc_caller, server_pid, node_pid)
+            .await
+    }
+}
+
 #[async_trait]
 impl OptionalApi for BitcoinOptionalApi {
+    async fn synced(&self, rpc_caller: RpcCaller) -> MentatResponse<Synced> {
+        let result = rpc_caller
+            .rpc_call::<Response<GetBlockchainInfoResponse>>(BitcoinJrpc::new(
+                "getblockchaininfo",
+                &[] as &[()],
+            ))
+            .await?;
+
+        Ok(Json(Synced {
+            local_tip: result.blocks,
+            global_tip: result.headers,
+        }))
+    }
+
     async fn node_address(&self, rpc_caller: &RpcCaller) -> Result<String> {
         let result = rpc_caller
             .rpc_call::<Response<Vec<Address>>>(BitcoinJrpc::new("getnodeaddresses", &[] as &[()]))
