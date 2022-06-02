@@ -10,5 +10,16 @@ futures = "0.3.21"
 hex = "0.4.3"
 bitcoin = "0.28.0"
 
-# [patch."https://github.com/monadicus/mentat"]
-# mentat = { path = "../mentat/mentat" }
+[profile.release]
+codegen-units = 1
+panic = "abort"
+lto = "thin"
+strip = true
+
+[profile.release-docker]
+inherits = "release"
+codegen-units = 1
+opt-level = "z"
+panic = "abort"
+lto = "thin"
+strip = true

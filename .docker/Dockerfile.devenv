@@ -1,0 +1,19 @@
+FROM rust:latest
+
+ENV DEBIAN_FRONTEND noninteractive
+RUN apt update \
+    && apt install -y build-essential git libssl-dev
+
+ENV ARCH=x86_64
+ENV BITCOIN_VERSION=22.0
+
+RUN wget https://bitcoin.org/bin/bitcoin-core-$BITCOIN_VERSION/bitcoin-$BITCOIN_VERSION-$ARCH-linux-gnu.tar.gz \
+    && tar -xf bitcoin-$BITCOIN_VERSION-$ARCH-linux-gnu.tar.gz \
+    && cp -R bitcoin-$BITCOIN_VERSION/* /usr
+
+RUN useradd -s /bin/bash -m vscode \
+    && groupadd docker && usermod -aG docker vscode
+
+EXPOSE 4032/tcp
+EXPOSE 4132/tcp
+EXPOSE 8080/tcp

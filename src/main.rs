@@ -14,8 +14,6 @@ mod responses;
 
 use mentat::{mentat, server::ServerType};
 
-/// a rosetta implementation for bitcoin using mentat
-// #[mentat(DefaultCacheInner)] caching is broken
 #[mentat]
 struct MentatBitcoin;
 
