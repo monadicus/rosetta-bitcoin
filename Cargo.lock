@@ -561,7 +561,7 @@ checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
 [[package]]
 name = "mentat"
 version = "0.1.0"
-source = "git+https://github.com/monadicus/mentat#5aca539b40bfc33de1eacd89bd6563fb50ad774e"
+source = "git+https://github.com/monadicus/mentat#3c31af0115702976a375a819de26e304928372dc"
 dependencies = [
  "axum",
  "color-backtrace",
@@ -589,7 +589,7 @@ dependencies = [
 [[package]]
 name = "mentat-macros"
 version = "0.1.0"
-source = "git+https://github.com/monadicus/mentat#5aca539b40bfc33de1eacd89bd6563fb50ad774e"
+source = "git+https://github.com/monadicus/mentat#3c31af0115702976a375a819de26e304928372dc"
 dependencies = [
  "proc-macro2",
  "quote",

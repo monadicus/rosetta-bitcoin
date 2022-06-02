@@ -1,0 +1,6 @@
+**/.git
+.git
+.gitignore
+LICENSE
+README.md
+/data

@@ -4,11 +4,27 @@ version = "0.1.0"
 edition = "2021"
 rust-version = "1.59.0"
 
+[profile.dev]
+codegen-units = 512
+debug = 2
+incremental = true
+opt-level = 0
+
+[profile.release]
+codegen-units = 1
+incremental = false
+lto = "thin"
+opt-level = 3
+panic = "abort"
+split-debuginfo = '...'
+strip = true
+
+[profile.release-docker]
+inherits = "release"
+opt-level = "z"
+
 [dependencies]
 mentat = { git = "https://github.com/monadicus/mentat", features = ["server"] }
 futures = "0.3.21"
 hex = "0.4.3"
 bitcoin = "0.28.0"
-
-# [patch."https://github.com/monadicus/mentat"]
-# mentat = { path = "../mentat/mentat" }
