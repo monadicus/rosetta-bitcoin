@@ -1,5 +1,5 @@
 .PHONY: build buld-local build-release run-mainnet-online run-mainnet-offline run-testnet-online \
-	run-testnet-offline tracing format check test clean
+	run-testnet-offline tracing fmt test clean
 
 PWD=$(shell pwd)
 NOFILE=100000
@@ -32,10 +32,8 @@ run-testnet-offline:
 tracing:
 	docker run -d -p6831:6831/udp -p6832:6832/udp -p16686:16686 -p14268:14268 jaegertracing/all-in-one:latest
 
-format:
+fmt:
 	cargo +nightly fmt --all
-
-check:
 	cargo clippy --all
 
 test:
