@@ -3,10 +3,10 @@
 use std::fmt::Debug;
 
 use mentat::{
-    errors::Result,
     serde::{de::DeserializeOwned, Deserialize},
     server::RpcResponse,
     tracing,
+    types::Result,
 };
 
 use super::ErrorResponse;

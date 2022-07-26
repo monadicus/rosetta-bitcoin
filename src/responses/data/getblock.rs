@@ -4,11 +4,8 @@ use futures::future::join_all;
 use mentat::{
     api::MentatResponse,
     axum::Json,
-    errors::*,
-    identifiers::BlockIdentifier,
-    models::Block,
-    responses::BlockResponse,
     server::RpcCaller,
+    types::{Block, BlockIdentifier, BlockResponse, Result},
 };
 
 use super::*;

@@ -4,8 +4,8 @@
 // digits"},"id":"1"}
 
 use mentat::{
-    errors::{MentatError, Result},
     serde::Deserialize,
+    types::{MentatError, Result},
 };
 
 /// the error response structure for bitcoind

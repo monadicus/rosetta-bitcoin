@@ -1,11 +1,9 @@
 //! a bitcoind scantxoutsetresult response
 
 use mentat::{
-    identifiers::BlockIdentifier,
     indexmap::IndexMap,
-    models::{Amount, Currency},
-    responses::AccountBalanceResponse,
     serde::Deserialize,
+    types::{AccountBalanceResponse, Amount, BlockIdentifier, Currency},
 };
 
 // #[derive(Clone, Debug, Deserialize)]

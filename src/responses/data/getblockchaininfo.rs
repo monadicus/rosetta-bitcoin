@@ -1,6 +1,9 @@
 //! a bitcoind getblockchaininfo response
 
-use mentat::{identifiers::NetworkIdentifier, responses::NetworkListResponse, serde::Deserialize};
+use mentat::{
+    serde::Deserialize,
+    types::{NetworkIdentifier, NetworkListResponse},
+};
 
 /// a bitcoind getblockchaininfo response
 #[allow(clippy::missing_docs_in_private_items)]

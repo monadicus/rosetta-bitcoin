@@ -4,10 +4,9 @@ use mentat::{
     api::{Caller, CallerOptionalApi, MentatResponse, OptionalApi},
     axum::{async_trait, Json},
     conf::{Mode, NodePid},
-    errors::Result,
-    responses::{HealthCheckResponse, NodeConnections, NodeNetwork, Synced},
     server::RpcCaller,
     sysinfo::Pid,
+    types::{HealthCheckResponse, NodeConnections, NodeNetwork, Result, Synced},
 };
 
 use crate::{

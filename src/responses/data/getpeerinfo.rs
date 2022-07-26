@@ -1,6 +1,6 @@
 //! a bitcoind peerinfo field
 
-use mentat::{indexmap::IndexMap, misc::Peer, serde::Deserialize};
+use mentat::{indexmap::IndexMap, serde::Deserialize, types::Peer};
 
 /// a bitcoind peer info field
 #[allow(clippy::missing_docs_in_private_items)]
