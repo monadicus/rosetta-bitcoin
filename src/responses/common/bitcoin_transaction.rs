@@ -1,6 +1,7 @@
 //! a bitcoind transaction
 
 use std::convert::TryFrom;
+use std::fmt::Write;
 
 use bitcoin::{hashes::hex::FromHex, Script, Transaction as BTCTransaction, TxIn, TxOut};
 use futures::future::join_all;
@@ -36,7 +37,7 @@ pub struct BitcoinScriptSig {
 #[serde(crate = "mentat::serde")]
 pub struct BitcoinVin {
     pub txid: Option<String>,
-    pub vout: Option<u64>,
+    pub vout: Option<i64>,
     pub scriptSig: Option<BitcoinScriptSig>,
     pub sequence: usize,
     // txinwitness: Option<Vec<String>>,
@@ -49,7 +50,7 @@ impl BitcoinVin {
     async fn into_operation(
         self,
         trans_idx: usize,
-        vin_index: u64,
+        vin_index: i64,
         rpc_caller: &RpcCaller,
     ) -> Result<Operation, MentatError> {
         let (account, amount) = match (&self.txid, self.vout) {
@@ -85,10 +86,10 @@ impl BitcoinVin {
 
         Ok(Operation {
             operation_identifier: OperationIdentifier {
-                index: vin_index as u64,
+                index: vin_index,
                 network_index: Some(self.vout.unwrap_or(0)),
             },
-            related_operations: None,
+            related_operations: Vec::new(),
             type_: if trans_idx == 0 && vin_index == 0 {
                 "COINBASE"
             } else {
@@ -103,7 +104,7 @@ impl BitcoinVin {
                     identifier: {
                         let mut out = id.clone();
                         if let Some(vout) = self.vout {
-                            out.push_str(&format!(":{}", vout));
+                            write!(out, ":{}", vout).unwrap();
                         }
                         out
                     },
@@ -142,19 +143,19 @@ pub struct BitcoinScriptPubKey {
 #[serde(crate = "mentat::serde")]
 pub struct BitcoinVout {
     pub value: f64,
-    pub n: u64,
+    pub n: i64,
     pub scriptPubKey: BitcoinScriptPubKey,
 }
 
 impl BitcoinVout {
     /// converts a bitcoind vout field into a rosetta operation
-    pub fn into_operation(self, index: u64, hash: &str) -> Operation {
+    pub fn into_operation(self, index: i64, hash: &str) -> Operation {
         Operation {
             operation_identifier: OperationIdentifier {
                 index,
                 network_index: Some(self.n),
             },
-            related_operations: None,
+            related_operations: Vec::new(),
             type_: String::from("OUTPUT"),
             status: Some(String::from("SUCCESS")),
             account: Some(AccountIdentifier {
@@ -220,7 +221,7 @@ impl BitcoinTransaction {
                     self.vin
                         .into_iter()
                         .enumerate()
-                        .map(|(i, vin)| vin.into_operation(index, i as u64, rpc_caller)),
+                        .map(|(i, vin)| vin.into_operation(index, i as i64, rpc_caller)),
                 )
                 .await
                 .into_iter()
@@ -229,12 +230,12 @@ impl BitcoinTransaction {
                     self.vout
                         .into_iter()
                         .enumerate()
-                        .map(|(i, vout)| vout.into_operation((i + vin_len) as u64, &self.hash))
+                        .map(|(i, vout)| vout.into_operation((i + vin_len) as i64, &self.hash))
                         .collect::<Vec<_>>(),
                 );
                 out
             },
-            related_transactions: None,
+            related_transactions: Vec::new(),
             metadata: [
                 ("size".to_string(), self.size.into()),
                 ("version".to_string(), self.version.into()),
@@ -267,7 +268,7 @@ impl From<TxIn> for BitcoinVin {
     fn from(value: TxIn) -> Self {
         BitcoinVin {
             txid: Some(value.previous_output.txid.to_string()),
-            vout: Some(value.previous_output.vout as u64),
+            vout: Some(value.previous_output.vout as i64),
             scriptSig: Some(value.script_sig.into()),
             sequence: value.sequence as usize,
             coinbase: None,

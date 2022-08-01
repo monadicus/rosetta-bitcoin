@@ -8,8 +8,8 @@ use bitcoin::{
     OutPoint, Script, Transaction, TxIn, TxOut, Txid, Witness,
 };
 use mentat::{
-    api::{Caller, CallerConstructionApi, ConstructionApi, MentatResponse},
-    axum::{async_trait, Json},
+    api::{Caller, CallerConstructionApi, ConstructionApi},
+    axum::async_trait,
     indexmap::IndexMap,
     serde_json::{self},
     server::RpcCaller,
@@ -19,7 +19,7 @@ use mentat::{
         ConstructionMetadataRequest, ConstructionMetadataResponse, ConstructionParseRequest,
         ConstructionParseResponse, ConstructionPayloadsRequest, ConstructionPayloadsResponse,
         ConstructionPreprocessRequest, ConstructionPreprocessResponse, ConstructionSubmitRequest,
-        Currency, MapErrMentat, SignatureType, SigningPayload, TransactionIdentifier,
+        Currency, MapErrMentat, Result, SignatureType, SigningPayload, TransactionIdentifier,
         TransactionIdentifierResponse,
     },
 };
@@ -47,20 +47,19 @@ impl ConstructionApi for BitcoinConstructionApi {
         _caller: Caller,
         data: ConstructionCombineRequest,
         _rpc_caller: RpcCaller,
-    ) -> MentatResponse<ConstructionCombineResponse> {
+    ) -> Result<ConstructionCombineResponse> {
         let mut tx = Transaction::deserialize(
             &hex::decode(data.unsigned_transaction)
                 .merr(|e| format!("transaction malformed: {e}"))?,
         )?;
         for (vin, sig) in tx.input.iter_mut().zip(data.signatures) {
-            vin.script_sig = Script::from(
-                hex::decode(sig.hex_bytes).merr(|e| format!("signature malformed: {e}"))?,
-            );
+            vin.script_sig =
+                Script::from(hex::decode(sig.hex_bytes).merr(|e| format!("signature malformed: {e}"))?);
         }
 
-        Ok(Json(ConstructionCombineResponse {
+        Ok(ConstructionCombineResponse {
             signed_transaction: hex::encode(tx.serialize()),
-        }))
+        })
     }
 
     async fn derive(
@@ -68,14 +67,14 @@ impl ConstructionApi for BitcoinConstructionApi {
         _caller: Caller,
         data: ConstructionDeriveRequest,
         rpc_caller: RpcCaller,
-    ) -> MentatResponse<ConstructionDeriveResponse> {
+    ) -> Result<ConstructionDeriveResponse> {
         // NOTE: This will get P2PKH SegWit addresses.
         // Most exchanges implement this as standard nowadays.
         let descriptor = format!("wpkh({})", data.public_key.hex_bytes);
         let address = rpc_caller
             .rpc_call::<Response<String>>(BitcoinJrpc::new("deriveaddresses", &[descriptor]))
             .await?;
-        Ok(Json(ConstructionDeriveResponse {
+        Ok(ConstructionDeriveResponse {
             address: None,
             account_identifier: Some(AccountIdentifier {
                 address,
@@ -83,7 +82,7 @@ impl ConstructionApi for BitcoinConstructionApi {
                 metadata: IndexMap::new(),
             }),
             metadata: IndexMap::new(),
-        }))
+        })
     }
 
     async fn hash(
@@ -91,7 +90,7 @@ impl ConstructionApi for BitcoinConstructionApi {
         _caller: Caller,
         data: ConstructionHashRequest,
         rpc_caller: RpcCaller,
-    ) -> MentatResponse<TransactionIdentifierResponse> {
+    ) -> Result<TransactionIdentifierResponse> {
         let hash = rpc_caller
             .rpc_call::<Response<BitcoinTransaction>>(BitcoinJrpc::new(
                 "decoderawtransaction",
@@ -99,10 +98,10 @@ impl ConstructionApi for BitcoinConstructionApi {
             ))
             .await?
             .hash;
-        Ok(Json(TransactionIdentifierResponse {
+        Ok(TransactionIdentifierResponse {
             transaction_identifier: TransactionIdentifier { hash },
             metadata: IndexMap::new(),
-        }))
+        })
     }
 
     async fn metadata(
@@ -110,7 +109,7 @@ impl ConstructionApi for BitcoinConstructionApi {
         _caller: Caller,
         _data: ConstructionMetadataRequest,
         rpc_caller: RpcCaller,
-    ) -> MentatResponse<ConstructionMetadataResponse> {
+    ) -> Result<ConstructionMetadataResponse> {
         let suggested_fee = rpc_caller
             .rpc_call::<Response<FeeEstimate>>(BitcoinJrpc::new(
                 "estimatesmartfee",
@@ -122,9 +121,9 @@ impl ConstructionApi for BitcoinConstructionApi {
             .await?
             .feerate;
 
-        Ok(Json(ConstructionMetadataResponse {
+        Ok(ConstructionMetadataResponse {
             metadata: Default::default(),
-            suggested_fee: Some(vec![Amount {
+            suggested_fee: vec![Amount {
                 value: suggested_fee.to_string(),
                 currency: Currency {
                     symbol: "BTC".to_string(),
@@ -132,8 +131,8 @@ impl ConstructionApi for BitcoinConstructionApi {
                     metadata: Default::default(),
                 },
                 metadata: Default::default(),
-            }]),
-        }))
+            }],
+        })
     }
 
     async fn parse(
@@ -141,35 +140,33 @@ impl ConstructionApi for BitcoinConstructionApi {
         _caller: Caller,
         data: ConstructionParseRequest,
         rpc_caller: RpcCaller,
-    ) -> MentatResponse<ConstructionParseResponse> {
+    ) -> Result<ConstructionParseResponse> {
         let tx = BitcoinTransaction::from(Transaction::deserialize(
             &hex::decode(data.transaction).merr(|e| format!("transaction malformed: {e}"))?,
         )?);
 
-        Ok(Json(ConstructionParseResponse {
+        Ok(ConstructionParseResponse {
             operations: tx
                 .clone()
                 .into_transaction(0, &rpc_caller)
                 .await?
                 .operations,
-            signers: None,
+            signers: Vec::new(),
             account_identifier_signers: if data.signed {
                 let vin_len = tx.vin.len();
                 let hash = tx.hash.clone();
-                Some(
-                    tx.vout
-                        .into_iter()
-                        .enumerate()
-                        .filter_map(|(i, vout)| {
-                            vout.into_operation((i + vin_len) as u64, &hash).account
-                        })
-                        .collect(),
-                )
+                tx.vout
+                    .into_iter()
+                    .enumerate()
+                    .filter_map(|(i, vout)| {
+                        vout.into_operation((i + vin_len) as i64, &hash).account
+                    })
+                    .collect()
             } else {
-                None
+                Vec::new()
             },
             metadata: Default::default(),
-        }))
+        })
     }
 
     // todo 0rphon: can clean this up once generalized jsonrpc_call is merged into
@@ -179,7 +176,7 @@ impl ConstructionApi for BitcoinConstructionApi {
         _caller: Caller,
         data: ConstructionPayloadsRequest,
         rpc_caller: RpcCaller,
-    ) -> MentatResponse<ConstructionPayloadsResponse> {
+    ) -> Result<ConstructionPayloadsResponse> {
         let mut tx = Transaction {
             version: 2,
             lock_time: 0,
@@ -260,10 +257,10 @@ impl ConstructionApi for BitcoinConstructionApi {
             }
         }
 
-        Ok(Json(ConstructionPayloadsResponse {
+        Ok(ConstructionPayloadsResponse {
             unsigned_transaction: hex::encode(tx.serialize()),
             payloads,
-        }))
+        })
     }
 
     async fn preprocess(
@@ -271,7 +268,7 @@ impl ConstructionApi for BitcoinConstructionApi {
         _caller: Caller,
         data: ConstructionPreprocessRequest,
         _rpc_caller: RpcCaller,
-    ) -> MentatResponse<ConstructionPreprocessResponse> {
+    ) -> Result<ConstructionPreprocessResponse> {
         let mut options = IndexMap::new();
 
         let coins: Vec<Coin> = data
@@ -292,21 +289,20 @@ impl ConstructionApi for BitcoinConstructionApi {
             .collect();
 
         options.insert("coins".to_string(), json!(coins));
-        Ok(Json(ConstructionPreprocessResponse {
+        Ok(ConstructionPreprocessResponse {
             options,
-            required_public_keys: Some(
-                data.operations
-                    .into_iter()
-                    .filter_map(|operation| {
-                        if operation.account.is_some() {
-                            operation.account
-                        } else {
-                            None
-                        }
-                    })
-                    .collect(),
-            ),
-        }))
+            required_public_keys: data
+                .operations
+                .into_iter()
+                .filter_map(|operation| {
+                    if operation.account.is_some() {
+                        operation.account
+                    } else {
+                        None
+                    }
+                })
+                .collect(),
+        })
     }
 
     async fn submit(
@@ -314,16 +310,16 @@ impl ConstructionApi for BitcoinConstructionApi {
         _caller: Caller,
         data: ConstructionSubmitRequest,
         rpc_caller: RpcCaller,
-    ) -> MentatResponse<TransactionIdentifierResponse> {
+    ) -> Result<TransactionIdentifierResponse> {
         let hash = rpc_caller
             .rpc_call::<Response<String>>(BitcoinJrpc::new(
                 "sendrawtransaction",
                 &[data.signed_transaction],
             ))
             .await?;
-        Ok(Json(TransactionIdentifierResponse {
+        Ok(TransactionIdentifierResponse {
             transaction_identifier: TransactionIdentifier { hash },
             metadata: IndexMap::new(),
-        }))
+        })
     }
 }

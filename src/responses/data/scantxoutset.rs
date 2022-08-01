@@ -24,7 +24,7 @@ use mentat::{
 pub struct ScanTxOutSetResult {
     // success: bool,
     // txouts: usize,
-    height: u64,
+    height: i64,
     bestblock: String,
     // unspents: Vec<Unspents>,
     total_amount: f64,

@@ -47,5 +47,5 @@ pub struct ScanObjectsDescriptor {
     /// account id
     pub desc: String,
     /// block end range
-    pub range: u64,
+    pub range: i64,
 }

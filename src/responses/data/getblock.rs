@@ -2,8 +2,6 @@
 
 use futures::future::join_all;
 use mentat::{
-    api::MentatResponse,
-    axum::Json,
     server::RpcCaller,
     types::{Block, BlockIdentifier, BlockResponse, Result},
 };
@@ -18,12 +16,12 @@ use crate::responses::common::BitcoinTransaction;
 pub struct GetBlockResponse {
     pub hash: String,
     // confirmations: usize,
-    pub height: u64,
+    pub height: i64,
     pub version: usize,
     // versionHex: String,
     pub merkleroot: String,
-    pub time: u64,
-    pub mediantime: u64,
+    pub time: i64,
+    pub mediantime: i64,
     pub nonce: usize,
     pub bits: String,
     pub difficulty: f64,
@@ -41,11 +39,8 @@ impl GetBlockResponse {
     /// convert GetBlock into a rosetta `BlockResponse`.
     /// makes calls to the bitcoind node during the conversion to get
     /// transaction info
-    pub async fn into_block_response(
-        self,
-        rpc_caller: &RpcCaller,
-    ) -> MentatResponse<BlockResponse> {
-        Ok(Json(BlockResponse {
+    pub async fn into_block_response(self, rpc_caller: &RpcCaller) -> Result<BlockResponse> {
+        Ok(BlockResponse {
             block: Some(Block {
                 transactions: join_all(
                     self.tx
@@ -77,7 +72,7 @@ impl GetBlockResponse {
                 ]
                 .into(),
             }),
-            other_transactions: None,
-        }))
+            other_transactions: Vec::new(),
+        })
     }
 }
