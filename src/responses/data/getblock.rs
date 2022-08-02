@@ -1,18 +1,15 @@
 //! a bitcoind getblock response
 
 use futures::future::join_all;
-use mentat::{
-    server::RpcCaller,
-    types::{Block, BlockIdentifier, BlockResponse, Result},
-};
+use mentat_server::{serde::Deserialize, server::RpcCaller};
+use mentat_types::{Block, BlockIdentifier, BlockResponse, Result};
 
-use super::*;
 use crate::responses::common::BitcoinTransaction;
 
 /// a bitcoind getblock response
 #[allow(non_snake_case, clippy::missing_docs_in_private_items)]
 #[derive(Debug, Deserialize)]
-#[serde(crate = "mentat::serde")]
+#[serde(crate = "mentat_server::serde")]
 pub struct GetBlockResponse {
     pub hash: String,
     // confirmations: usize,

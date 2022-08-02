@@ -1,22 +1,31 @@
 //! a bitcoind transaction
 
-use std::convert::TryFrom;
-use std::fmt::Write;
+use std::{convert::TryFrom, fmt::Write};
 
 use bitcoin::{hashes::hex::FromHex, Script, Transaction as BTCTransaction, TxIn, TxOut};
 use futures::future::join_all;
-use mentat::{
+use mentat_server::{
     indexmap::IndexMap,
-    serde::Serialize,
+    serde::{Deserialize, Serialize},
     serde_json::{self, json},
     server::RpcCaller,
-    types::{
-        AccountIdentifier, Amount, CoinAction, CoinChange, CoinIdentifier, Currency, MapErrMentat,
-        MentatError, Operation, OperationIdentifier, Result, Transaction, TransactionIdentifier,
-    },
+};
+use mentat_types::{
+    AccountIdentifier,
+    Amount,
+    CoinAction,
+    CoinChange,
+    CoinIdentifier,
+    Currency,
+    MapErrMentat,
+    MentatError,
+    Operation,
+    OperationIdentifier,
+    Result,
+    Transaction,
+    TransactionIdentifier,
 };
 
-use super::*;
 use crate::{
     request::{trim_hash, BitcoinJrpc},
     responses::Response,
@@ -25,7 +34,7 @@ use crate::{
 /// a bitcoind scriptsig field
 #[allow(clippy::missing_docs_in_private_items)]
 #[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(crate = "mentat::serde")]
+#[serde(crate = "mentat_server::serde")]
 pub struct BitcoinScriptSig {
     asm: String,
     hex: String,
@@ -34,7 +43,7 @@ pub struct BitcoinScriptSig {
 /// a bitcoind vin field
 #[allow(non_snake_case, clippy::missing_docs_in_private_items)]
 #[derive(Clone, Debug, Deserialize)]
-#[serde(crate = "mentat::serde")]
+#[serde(crate = "mentat_server::serde")]
 pub struct BitcoinVin {
     pub txid: Option<String>,
     pub vout: Option<i64>,
@@ -129,7 +138,7 @@ impl BitcoinVin {
 /// a bitcoind scriptpubkey field
 #[allow(clippy::missing_docs_in_private_items)]
 #[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(crate = "mentat::serde")]
+#[serde(crate = "mentat_server::serde")]
 pub struct BitcoinScriptPubKey {
     pub asm: String,
     pub hex: String,
@@ -140,7 +149,7 @@ pub struct BitcoinScriptPubKey {
 /// a bitcoind vout field
 #[allow(non_snake_case, clippy::missing_docs_in_private_items)]
 #[derive(Clone, Debug, Deserialize)]
-#[serde(crate = "mentat::serde")]
+#[serde(crate = "mentat_server::serde")]
 pub struct BitcoinVout {
     pub value: f64,
     pub n: i64,
@@ -190,7 +199,7 @@ impl BitcoinVout {
 /// a bitcoind transaction field
 #[allow(clippy::missing_docs_in_private_items)]
 #[derive(Clone, Debug, Deserialize)]
-#[serde(crate = "mentat::serde")]
+#[serde(crate = "mentat_server::serde")]
 pub struct BitcoinTransaction {
     // txid: String,
     pub hash: String,

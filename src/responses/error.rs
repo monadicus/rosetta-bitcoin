@@ -3,14 +3,12 @@
 // {"jsonrpc":"2.0","error":{"code":-32000,"message":"Odd number of
 // digits"},"id":"1"}
 
-use mentat::{
-    serde::Deserialize,
-    types::{MentatError, Result},
-};
+use mentat_server::serde::Deserialize;
+use mentat_types::{MentatError, Result};
 
 /// the error response structure for bitcoind
 #[derive(Clone, Debug, Deserialize)]
-#[serde(crate = "mentat::serde")]
+#[serde(crate = "mentat_server::serde")]
 pub struct ErrorResponse {
     /// the error code
     pub code: i32,

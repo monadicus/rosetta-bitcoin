@@ -24,10 +24,14 @@ inherits = "release"
 opt-level = "z"
 
 [dependencies]
-mentat = { git = "https://github.com/monadicus/mentat", features = ["server"] }
+mentat-asserter = { git = "https://github.com/monadicus/mentat" }
+mentat-server = { git = "https://github.com/monadicus/mentat" }
+mentat-types = { git = "https://github.com/monadicus/mentat" }
 futures = "0.3.21"
 hex = "0.4.3"
 bitcoin = "0.28.0"
 
-[patch."https://github.com/monadicus/mentat"]
-mentat = { path = "../mentat/mentat" }
+# [patch."https://github.com/monadicus/mentat"]
+# mentat-asserter = { path = "../mentat/crates/mentat-asserter" }
+# mentat-server = { path = "../mentat/crates/mentat-server" }
+# mentat-types = { path = "../mentat/crates/mentat-types" }

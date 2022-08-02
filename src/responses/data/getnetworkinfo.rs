@@ -1,9 +1,9 @@
 //! a bitcoind networkinfo field
 
-use mentat::serde::Deserialize;
+use mentat_server::serde::Deserialize;
 
 // #[derive(Clone, Debug, Deserialize)]
-// #[serde(crate = "mentat::serde")]
+// #[serde(crate = "mentat_server::serde")]
 // pub struct Network {
 //     name: String,
 //     limited: bool,
@@ -13,7 +13,7 @@ use mentat::serde::Deserialize;
 // }
 
 // #[derive(Clone, Debug, Deserialize)]
-// #[serde(crate = "mentat::serde")]
+// #[serde(crate = "mentat_server::serde")]
 // pub struct LocalAddress {
 //     address: String,
 //     port: usize,
@@ -23,7 +23,7 @@ use mentat::serde::Deserialize;
 /// a bitcoind networkinfo field
 #[allow(non_snake_case, clippy::missing_docs_in_private_items)]
 #[derive(Clone, Debug, Deserialize)]
-#[serde(crate = "mentat::serde")]
+#[serde(crate = "mentat_server::serde")]
 pub struct GetNetworkInfo {
     // pub version: usize,
     pub subversion: String,

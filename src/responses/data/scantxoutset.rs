@@ -1,13 +1,10 @@
 //! a bitcoind scantxoutsetresult response
 
-use mentat::{
-    indexmap::IndexMap,
-    serde::Deserialize,
-    types::{AccountBalanceResponse, Amount, BlockIdentifier, Currency},
-};
+use mentat_server::{indexmap::IndexMap, serde::Deserialize};
+use mentat_types::{AccountBalanceResponse, Amount, BlockIdentifier, Currency};
 
 // #[derive(Clone, Debug, Deserialize)]
-// #[serde(crate = "mentat::serde")]
+// #[serde(crate = "mentat_server::serde")]
 // pub struct Unspents {
 //     txid: String,
 //     vout: usize,
@@ -20,7 +17,7 @@ use mentat::{
 /// a bitcoind scantxoutsetresult response
 #[allow(clippy::missing_docs_in_private_items)]
 #[derive(Clone, Debug, Deserialize)]
-#[serde(crate = "mentat::serde")]
+#[serde(crate = "mentat_server::serde")]
 pub struct ScanTxOutSetResult {
     // success: bool,
     // txouts: usize,

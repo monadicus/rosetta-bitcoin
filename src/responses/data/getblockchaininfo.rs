@@ -1,14 +1,12 @@
 //! a bitcoind getblockchaininfo response
 
-use mentat::{
-    serde::Deserialize,
-    types::{NetworkIdentifier, NetworkListResponse},
-};
+use mentat_server::serde::Deserialize;
+use mentat_types::{NetworkIdentifier, NetworkListResponse};
 
 /// a bitcoind getblockchaininfo response
 #[allow(clippy::missing_docs_in_private_items)]
 #[derive(Debug, Deserialize)]
-#[serde(crate = "mentat::serde")]
+#[serde(crate = "mentat_server::serde")]
 pub struct GetBlockchainInfoResponse {
     pub blocks: usize,
     pub chain: String,

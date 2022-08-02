@@ -2,17 +2,17 @@
 
 use std::{path::PathBuf, process::Command, str::FromStr};
 
-use mentat::{
+use mentat_asserter::Asserter;
+use mentat_server::{
     axum::async_trait,
     conf::{Configuration, Network, NodeConf},
     reqwest::Url,
     serde::{Deserialize, Serialize},
-    Asserter,
 };
 
 /// configuration information/logic for the bitcoind node
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
-#[serde(crate = "mentat::serde")]
+#[serde(crate = "mentat_server::serde")]
 pub struct NodeConfig {
     /// where to store blocks and other data
     data_dir: PathBuf,
@@ -65,10 +65,7 @@ impl NodeConf for NodeConfig {
             &format!("-rpcuser={}", config.custom.user),
             &format!("-rpcpassword={}", config.custom.pass),
             "-txindex=1",
-            &format!(
-                "--datadir={}",
-                config.custom.data_dir.display()
-            ),
+            &format!("--datadir={}", config.custom.data_dir.display()),
         ]);
         command
     }

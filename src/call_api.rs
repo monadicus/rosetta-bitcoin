@@ -1,12 +1,12 @@
 //! rosetta call api implementation for bitcoind using mentat
 
-use mentat::{
-    api::{CallApi, Caller, CallerCallApi},
+use mentat_server::{
+    api::{CallApi, CallerCallApi},
     axum::async_trait,
     serde_json::Value,
     server::RpcCaller,
-    types::{CallRequest, CallResponse, Result},
 };
+use mentat_types::{CallRequest, CallResponse, Caller, Result};
 
 use crate::{request::BitcoinJrpc, responses::Response};
 

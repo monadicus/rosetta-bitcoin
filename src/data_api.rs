@@ -1,18 +1,36 @@
 //! rosetta data api implementation for bitcoind using mentat
 
-use mentat::{
-    api::{Caller, CallerDataApi, DataApi},
+use mentat_server::{
+    api::{CallerDataApi, DataApi},
     axum::async_trait,
     indexmap::IndexMap,
     serde_json::json,
     server::RpcCaller,
-    types::{
-        AccountBalanceRequest, AccountBalanceResponse, Allow, BlockIdentifier, BlockRequest,
-        BlockResponse, BlockTransactionRequest, BlockTransactionResponse, MempoolResponse,
-        MempoolTransactionRequest, MempoolTransactionResponse, MentatError, MetadataRequest,
-        NetworkListResponse, NetworkOptionsResponse, NetworkRequest, NetworkStatusResponse,
-        OperationStatus, PartialBlockIdentifier, Result, TransactionIdentifier, Version,
-    },
+};
+use mentat_types::{
+    AccountBalanceRequest,
+    AccountBalanceResponse,
+    Allow,
+    BlockIdentifier,
+    BlockRequest,
+    BlockResponse,
+    BlockTransactionRequest,
+    BlockTransactionResponse,
+    Caller,
+    MempoolResponse,
+    MempoolTransactionRequest,
+    MempoolTransactionResponse,
+    MentatError,
+    MetadataRequest,
+    NetworkListResponse,
+    NetworkOptionsResponse,
+    NetworkRequest,
+    NetworkStatusResponse,
+    OperationStatus,
+    PartialBlockIdentifier,
+    Result,
+    TransactionIdentifier,
+    Version,
 };
 
 use crate::{
