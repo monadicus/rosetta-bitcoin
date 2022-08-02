@@ -11,6 +11,7 @@ use mentat::{
     api::{Caller, CallerConstructionApi, ConstructionApi},
     axum::async_trait,
     indexmap::IndexMap,
+    macro_exports::encode_to_hex_string,
     serde_json::{self},
     server::RpcCaller,
     types::{
@@ -54,7 +55,7 @@ impl ConstructionApi for BitcoinConstructionApi {
         )?;
         for (vin, sig) in tx.input.iter_mut().zip(data.signatures) {
             vin.script_sig =
-                Script::from(hex::decode(sig.hex_bytes).merr(|e| format!("signature malformed: {e}"))?);
+                Script::from(hex::decode(sig.bytes).merr(|e| format!("signature malformed: {e}"))?);
         }
 
         Ok(ConstructionCombineResponse {
@@ -70,7 +71,7 @@ impl ConstructionApi for BitcoinConstructionApi {
     ) -> Result<ConstructionDeriveResponse> {
         // NOTE: This will get P2PKH SegWit addresses.
         // Most exchanges implement this as standard nowadays.
-        let descriptor = format!("wpkh({})", data.public_key.hex_bytes);
+        let descriptor = format!("wpkh({})", encode_to_hex_string(&data.public_key.bytes));
         let address = rpc_caller
             .rpc_call::<Response<String>>(BitcoinJrpc::new("deriveaddresses", &[descriptor]))
             .await?;
@@ -229,9 +230,9 @@ impl ConstructionApi for BitcoinConstructionApi {
             payloads.push(SigningPayload {
                 address: None,
                 account_identifier: None,
-                hex_bytes: tx
+                bytes: tx
                     .signature_hash(i, &script_pub_key.try_into()?, 0)
-                    .to_string(),
+                    .to_vec(),
                 signature_type: Some(SignatureType::Ecdsa),
             });
         }
