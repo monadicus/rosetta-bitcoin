@@ -2,16 +2,17 @@
 
 use std::{path::PathBuf, process::Command, str::FromStr};
 
-use mentat::{
+use mentat_asserter::Asserter;
+use mentat_server::{
     axum::async_trait,
-    conf::{Configuration, NodeConf},
+    conf::{Configuration, Network, NodeConf},
     reqwest::Url,
     serde::{Deserialize, Serialize},
 };
 
 /// configuration information/logic for the bitcoind node
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
-#[serde(crate = "mentat::serde")]
+#[serde(crate = "mentat_server::serde")]
 pub struct NodeConfig {
     /// where to store blocks and other data
     data_dir: PathBuf,
@@ -25,12 +26,24 @@ pub struct NodeConfig {
 impl NodeConf for NodeConfig {
     const BLOCKCHAIN: &'static str = "Bitcoin";
 
+    fn init_asserter(&self, network: &Network) -> Asserter {
+        Asserter::new_server(
+            vec!["INPUT".into(), "OUTPUT".into(), "COINBASE".into()],
+            true,
+            vec![(Self::BLOCKCHAIN.to_string(), network.to_string()).into()],
+            Vec::new(),
+            false,
+            None,
+        )
+        .unwrap()
+    }
+
     fn build_url(conf: &Configuration<Self>) -> Url {
         let url = format!(
             "{}://{}:{}@{}:{}",
             if conf.secure_http { "https" } else { "http" },
-            conf.custom.as_ref().unwrap().user,
-            conf.custom.as_ref().unwrap().pass,
+            conf.custom.user,
+            conf.custom.pass,
             conf.node_address,
             conf.node_rpc_port
         );
@@ -49,13 +62,10 @@ impl NodeConf for NodeConfig {
             // Locally-run instances may remove rpcuser to use cookie-based auth, or may be
             // replaced with rpcauth. Please see share/rpcauth for rpcauth auth generation.`
             &format!("-rpcport={}", config.node_rpc_port),
-            &format!("-rpcuser={}", config.custom.as_ref().unwrap().user),
-            &format!("-rpcpassword={}", config.custom.as_ref().unwrap().pass),
+            &format!("-rpcuser={}", config.custom.user),
+            &format!("-rpcpassword={}", config.custom.pass),
             "-txindex=1",
-            &format!(
-                "--datadir={}",
-                config.custom.as_ref().unwrap().data_dir.display()
-            ),
+            &format!("--datadir={}", config.custom.data_dir.display()),
         ]);
         command
     }

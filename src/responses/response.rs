@@ -2,19 +2,19 @@
 
 use std::fmt::Debug;
 
-use mentat::{
-    errors::Result,
+use mentat_server::{
     serde::{de::DeserializeOwned, Deserialize},
     server::RpcResponse,
     tracing,
 };
+use mentat_types::Result;
 
 use super::ErrorResponse;
 use crate::request::BitcoinJrpc;
 
 /// the response structure for bitcoind
 #[derive(Clone, Debug, Deserialize)]
-#[serde(crate = "mentat::serde")]
+#[serde(crate = "mentat_server::serde")]
 pub struct Response<R> {
     /// a successful bitcoind response
     pub result: Option<R>,

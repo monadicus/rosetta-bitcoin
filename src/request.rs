@@ -1,6 +1,6 @@
 //! rpc requests
 
-use mentat::{
+use mentat_server::{
     serde::Serialize,
     serde_json::{json, Value},
 };
@@ -16,7 +16,7 @@ pub fn trim_hash(hash: &str) -> &str {
 
 /// the rpc request structure for bitcoind
 #[derive(Debug, Serialize)]
-#[serde(crate = "mentat::serde")]
+#[serde(crate = "mentat_server::serde")]
 pub struct BitcoinJrpc {
     /// rpc info
     jsonrpc: String,
@@ -42,10 +42,10 @@ impl BitcoinJrpc {
 
 /// request object for `account/balance` endpoint
 #[derive(Debug, Serialize)]
-#[serde(crate = "mentat::serde")]
+#[serde(crate = "mentat_server::serde")]
 pub struct ScanObjectsDescriptor {
     /// account id
     pub desc: String,
     /// block end range
-    pub range: u64,
+    pub range: i64,
 }

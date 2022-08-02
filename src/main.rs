@@ -12,7 +12,7 @@ mod optional_api;
 mod request;
 mod responses;
 
-use mentat::{mentat, server::ServerType};
+use mentat_server::{mentat, server::ServerType};
 
 /// The mentat rosetta-bitcoin.
 #[mentat]

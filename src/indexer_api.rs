@@ -1,6 +1,6 @@
 //! rosetta indexer api implementation for bitcoind using mentat
 
-use mentat::{
+use mentat_server::{
     api::{CallerIndexerApi, IndexerApi},
     axum::async_trait,
 };

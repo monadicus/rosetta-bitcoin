@@ -1,13 +1,20 @@
 //! The optional api endpoints for bitcoind.
 
-use mentat::{
-    api::{Caller, CallerOptionalApi, MentatResponse, OptionalApi},
+use mentat_server::{
+    api::{CallerOptionalApi, OptionalApi},
     axum::{async_trait, Json},
     conf::{Mode, NodePid},
-    errors::Result,
-    responses::{HealthCheckResponse, NodeConnections, NodeNetwork, Synced},
     server::RpcCaller,
     sysinfo::Pid,
+};
+use mentat_types::{
+    Caller,
+    HealthCheckResponse,
+    MentatResponse,
+    NodeConnections,
+    NodeNetwork,
+    Result,
+    Synced,
 };
 
 use crate::{

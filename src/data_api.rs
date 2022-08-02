@@ -1,17 +1,36 @@
 //! rosetta data api implementation for bitcoind using mentat
 
-use mentat::{
-    api::{Caller, CallerDataApi, DataApi, MentatResponse},
-    axum::{async_trait, Json},
-    errors::*,
-    identifiers::{BlockIdentifier, PartialBlockIdentifier, TransactionIdentifier},
+use mentat_server::{
+    api::{CallerDataApi, DataApi},
+    axum::async_trait,
     indexmap::IndexMap,
-    misc::{OperationStatus, Version},
-    models::Allow,
-    requests::*,
-    responses::*,
     serde_json::json,
     server::RpcCaller,
+};
+use mentat_types::{
+    AccountBalanceRequest,
+    AccountBalanceResponse,
+    Allow,
+    BlockIdentifier,
+    BlockRequest,
+    BlockResponse,
+    BlockTransactionRequest,
+    BlockTransactionResponse,
+    Caller,
+    MempoolResponse,
+    MempoolTransactionRequest,
+    MempoolTransactionResponse,
+    MentatError,
+    MetadataRequest,
+    NetworkListResponse,
+    NetworkOptionsResponse,
+    NetworkRequest,
+    NetworkStatusResponse,
+    OperationStatus,
+    PartialBlockIdentifier,
+    Result,
+    TransactionIdentifier,
+    Version,
 };
 
 use crate::{
@@ -33,16 +52,14 @@ impl DataApi for BitcoinDataApi {
         _caller: Caller,
         _data: MetadataRequest,
         rpc_caller: RpcCaller,
-    ) -> MentatResponse<NetworkListResponse> {
-        Ok(Json(
-            rpc_caller
-                .rpc_call::<Response<GetBlockchainInfoResponse>>(BitcoinJrpc::new(
-                    "getblockchaininfo",
-                    &[] as &[u8],
-                ))
-                .await?
-                .into(),
-        ))
+    ) -> Result<NetworkListResponse> {
+        Ok(rpc_caller
+            .rpc_call::<Response<GetBlockchainInfoResponse>>(BitcoinJrpc::new(
+                "getblockchaininfo",
+                &[] as &[u8],
+            ))
+            .await?
+            .into())
     }
 
     // TODO: this can be quite general for all mentat implementations
@@ -51,8 +68,8 @@ impl DataApi for BitcoinDataApi {
         _caller: Caller,
         _data: NetworkRequest,
         rpc_caller: RpcCaller,
-    ) -> MentatResponse<NetworkOptionsResponse> {
-        Ok(Json(NetworkOptionsResponse {
+    ) -> Result<NetworkOptionsResponse> {
+        Ok(NetworkOptionsResponse {
             version: Version {
                 // TODO: fetch this
                 // This is just the current Rosetta version for now
@@ -88,11 +105,11 @@ impl DataApi for BitcoinDataApi {
                 historical_balance_lookup: true,
                 timestamp_start_index: None,
                 // TODO: populate this when `/call` is populated.
-                call_methods: None,
-                balance_exemptions: None,
+                call_methods: Vec::new(),
+                balance_exemptions: Vec::new(),
                 mempool_coins: false,
             },
-        }))
+        })
     }
 
     async fn network_status(
@@ -100,7 +117,7 @@ impl DataApi for BitcoinDataApi {
         _caller: Caller,
         _data: NetworkRequest,
         rpc_caller: RpcCaller,
-    ) -> MentatResponse<NetworkStatusResponse> {
+    ) -> Result<NetworkStatusResponse> {
         let current_hash = rpc_caller
             .rpc_call::<Response<String>>(BitcoinJrpc::new("getbestblockhash", &[] as &[u8]))
             .await?;
@@ -121,7 +138,7 @@ impl DataApi for BitcoinDataApi {
             ))
             .await?;
 
-        Ok(Json(NetworkStatusResponse {
+        Ok(NetworkStatusResponse {
             current_block_identifier: BlockIdentifier {
                 index: current_block.height,
                 hash: current_hash,
@@ -139,7 +156,7 @@ impl DataApi for BitcoinDataApi {
                 .into_iter()
                 .map(|p| p.into())
                 .collect(),
-        }))
+        })
     }
 
     async fn account_balance(
@@ -147,7 +164,7 @@ impl DataApi for BitcoinDataApi {
         _caller: Caller,
         data: AccountBalanceRequest,
         rpc_caller: RpcCaller,
-    ) -> MentatResponse<AccountBalanceResponse> {
+    ) -> Result<AccountBalanceResponse> {
         let id = match data.block_identifier {
             Some(PartialBlockIdentifier {
                 index: Some(index),
@@ -196,12 +213,10 @@ impl DataApi for BitcoinDataApi {
             ]
         };
 
-        Ok(Json(
-            rpc_caller
-                .rpc_call::<Response<ScanTxOutSetResult>>(BitcoinJrpc::new("scantxoutset", &args))
-                .await?
-                .into_balance(id),
-        ))
+        Ok(rpc_caller
+            .rpc_call::<Response<ScanTxOutSetResult>>(BitcoinJrpc::new("scantxoutset", &args))
+            .await?
+            .into_balance(id))
     }
 
     async fn block(
@@ -209,7 +224,7 @@ impl DataApi for BitcoinDataApi {
         _caller: Caller,
         data: BlockRequest,
         rpc_caller: RpcCaller,
-    ) -> MentatResponse<BlockResponse> {
+    ) -> Result<BlockResponse> {
         let hash = if let Some(block_hash) = data.block_identifier.hash {
             trim_hash(&block_hash).to_string()
         } else if let Some(block_id) = data.block_identifier.index {
@@ -237,7 +252,7 @@ impl DataApi for BitcoinDataApi {
         _caller: Caller,
         data: BlockTransactionRequest,
         rpc_caller: RpcCaller,
-    ) -> MentatResponse<BlockTransactionResponse> {
+    ) -> Result<BlockTransactionResponse> {
         let block_hash = trim_hash(&data.block_identifier.hash);
         let tx_hash = trim_hash(&data.transaction_identifier.hash);
 
@@ -254,9 +269,9 @@ impl DataApi for BitcoinDataApi {
             .enumerate()
             .find(|(_, tx)| tx.hash == tx_hash)
         {
-            Ok(Json(BlockTransactionResponse {
+            Ok(BlockTransactionResponse {
                 transaction: tx.into_transaction(i, &rpc_caller).await?,
-            }))
+            })
         } else {
             MentatError::transaction_not_found(Some(&data.transaction_identifier.hash))
         }
@@ -267,16 +282,16 @@ impl DataApi for BitcoinDataApi {
         _caller: Caller,
         _data: NetworkRequest,
         rpc_caller: RpcCaller,
-    ) -> MentatResponse<MempoolResponse> {
+    ) -> Result<MempoolResponse> {
         let transaction_identifiers = rpc_caller
             .rpc_call::<Response<Vec<String>>>(BitcoinJrpc::new("getrawmempool", &[] as &[u8]))
             .await?
             .into_iter()
             .map(|hash| TransactionIdentifier { hash })
             .collect();
-        Ok(Json(MempoolResponse {
+        Ok(MempoolResponse {
             transaction_identifiers,
-        }))
+        })
     }
 
     async fn mempool_transaction(
@@ -284,7 +299,7 @@ impl DataApi for BitcoinDataApi {
         _caller: Caller,
         data: MempoolTransactionRequest,
         rpc_caller: RpcCaller,
-    ) -> MentatResponse<MempoolTransactionResponse> {
+    ) -> Result<MempoolTransactionResponse> {
         let tx_hash = trim_hash(&data.transaction_identifier.hash);
         let mempool = rpc_caller
             .rpc_call::<Response<Vec<String>>>(BitcoinJrpc::new("getrawmempool", &[] as &[u8]))
@@ -303,10 +318,10 @@ impl DataApi for BitcoinDataApi {
                 .await?
                 .into_transaction(i, &rpc_caller)
                 .await?;
-            Ok(Json(MempoolTransactionResponse {
+            Ok(MempoolTransactionResponse {
                 transaction,
                 metadata: IndexMap::new(),
-            }))
+            })
         } else {
             MentatError::transaction_not_found(Some(&data.transaction_identifier.hash))
         }

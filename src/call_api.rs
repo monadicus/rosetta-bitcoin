@@ -1,13 +1,12 @@
 //! rosetta call api implementation for bitcoind using mentat
 
-use mentat::{
-    api::{CallApi, Caller, CallerCallApi, MentatResponse},
-    axum::{async_trait, Json},
-    requests::*,
-    responses::*,
+use mentat_server::{
+    api::{CallApi, CallerCallApi},
+    axum::async_trait,
     serde_json::Value,
     server::RpcCaller,
 };
+use mentat_types::{CallRequest, CallResponse, Caller, Result};
 
 use crate::{request::BitcoinJrpc, responses::Response};
 
@@ -29,7 +28,7 @@ impl CallApi for BitcoinCallApi {
         _caller: Caller,
         data: CallRequest,
         rpc_caller: RpcCaller,
-    ) -> MentatResponse<CallResponse> {
+    ) -> Result<CallResponse> {
         let result = rpc_caller
             .rpc_call::<Response<Value>>(BitcoinJrpc::new(
                 &data.method,
@@ -40,7 +39,7 @@ impl CallApi for BitcoinCallApi {
                     .collect::<Vec<_>>(),
             ))
             .await?;
-        Ok(Json(CallResponse {
+        Ok(CallResponse {
             result,
             // TODO: figure out when to set this as true
             //     Idempotent indicates that if /call is invoked with the same CallRequest again, at
@@ -49,6 +48,6 @@ impl CallApi for BitcoinCallApi {
             // implementation. For this reason, implementers should be very conservative about
             // returning true here or they could cause issues for the caller.
             idempotent: false,
-        }))
+        })
     }
 }
