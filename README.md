@@ -12,6 +12,8 @@ We supply an Insomnia file with example payloads for every endpoint. You can fin
 
 <a href="insomnia://app/import?uri=https://github.com/monadicus/rosetta-bitcoin/blob/main/tools/Insomnia_example_payloads.json">Run in Insomnia</a>
 
+<insomnia://app/import?uri=https://github.com/monadicus/rosetta-bitcoin/blob/main/tools/Insomnia_example_payloads.json>
+
 ### Regtest Node
 
 Running this regtest bitcoin example requires `docker` and uses docker for the running the node.
