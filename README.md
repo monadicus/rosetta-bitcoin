@@ -10,7 +10,7 @@ We supply an Insomnia file with example payloads for every endpoint. You can fin
 
 [Run in Insomnia](insomnia://app/import?uri=https://github.com/monadicus/rosetta-bitcoin/blob/main/tools/Insomnia_example_payloads.json)
 
-<a href="insomnia://app/import?uri=https://github.com/monadicus/rosetta-bitcoin/blob/main/tools/Insomnia_example_payloads.json" target="_blank"><img src="https://insomnia.rest/images/run.svg" alt="Run in Insomnia"></a>
+<a href="insomnia://app/import?uri=https://github.com/monadicus/rosetta-bitcoin/blob/main/tools/Insomnia_example_payloads.json">Run in Insomnia</a>
 
 ### Regtest Node
 
