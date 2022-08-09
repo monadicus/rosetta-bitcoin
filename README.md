@@ -8,7 +8,7 @@ TODO
 
 We supply an Insomnia file with example payloads for every endpoint. You can find the file [here](https://github.com/monadicus/rosetta-bitcoin/blob/main/tools/Insomnia_example_payloads.json), or if you already have Insomnia installed you can use the button below to automatically import them.
 
-[![Run in Insomnia}](https://insomnia.rest/images/run.svg)](https://insomnia.rest/run/?label=sync-btc&uri=https%3A%2F%2Fgithub.com%2Fmonadicus%2Frosetta-bitcoin%2Fblob%2Fmain%2Ftools%2FInsomnia_example_payloads.json)
+[![Run in Insomnia}](https://insomnia.rest/images/run.svg)](insomnia://app/import?uri=https://github.com/monadicus/rosetta-bitcoin/blob/main/tools/Insomnia_example_payloads.json)
 
 ### Regtest Node
 
