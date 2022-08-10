@@ -73,7 +73,7 @@ impl DataApi for BitcoinDataApi {
             version: Version {
                 // TODO: fetch this
                 // This is just the current Rosetta version for now
-                rosetta_version: "1.4.10".to_owned(),
+                rosetta_version: "1.4.12".to_owned(),
                 node_version: rpc_caller
                     .rpc_call::<Response<GetNetworkInfo>>(BitcoinJrpc::new(
                         "getnetworkinfo",

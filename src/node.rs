@@ -30,7 +30,7 @@ impl NodeConf for NodeConfig {
         Asserter::new_server(
             vec!["INPUT".into(), "OUTPUT".into(), "COINBASE".into()],
             true,
-            vec![(Self::BLOCKCHAIN.to_string(), network.to_string()).into()],
+            vec![(Self::BLOCKCHAIN, network.to_string().as_str()).into()],
             Vec::new(),
             false,
             None,
