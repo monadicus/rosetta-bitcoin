@@ -11,19 +11,8 @@ use mentat_server::{
     server::RpcCaller,
 };
 use mentat_types::{
-    AccountIdentifier,
-    Amount,
-    CoinAction,
-    CoinChange,
-    CoinIdentifier,
-    Currency,
-    MapErrMentat,
-    MentatError,
-    Operation,
-    OperationIdentifier,
-    Result,
-    Transaction,
-    TransactionIdentifier,
+    AccountIdentifier, Amount, CoinAction, CoinChange, CoinIdentifier, Currency, MapErrMentat,
+    MentatError, Operation, OperationIdentifier, Result, Transaction, TransactionIdentifier,
 };
 
 use crate::{
@@ -46,7 +35,7 @@ pub struct BitcoinScriptSig {
 #[serde(crate = "mentat_server::serde")]
 pub struct BitcoinVin {
     pub txid: Option<String>,
-    pub vout: Option<i64>,
+    pub vout: Option<usize>,
     pub scriptSig: Option<BitcoinScriptSig>,
     pub sequence: usize,
     // txinwitness: Option<Vec<String>>,
@@ -59,7 +48,7 @@ impl BitcoinVin {
     async fn into_operation(
         self,
         trans_idx: usize,
-        vin_index: i64,
+        vin_index: usize,
         rpc_caller: &RpcCaller,
     ) -> Result<Operation, MentatError> {
         let (account, amount) = match (&self.txid, self.vout) {
@@ -152,13 +141,13 @@ pub struct BitcoinScriptPubKey {
 #[serde(crate = "mentat_server::serde")]
 pub struct BitcoinVout {
     pub value: f64,
-    pub n: i64,
+    pub n: usize,
     pub scriptPubKey: BitcoinScriptPubKey,
 }
 
 impl BitcoinVout {
     /// converts a bitcoind vout field into a rosetta operation
-    pub fn into_operation(self, index: i64, hash: &str) -> Operation {
+    pub fn into_operation(self, index: usize, hash: &str) -> Operation {
         Operation {
             operation_identifier: OperationIdentifier {
                 index,
@@ -230,7 +219,7 @@ impl BitcoinTransaction {
                     self.vin
                         .into_iter()
                         .enumerate()
-                        .map(|(i, vin)| vin.into_operation(index, i as i64, rpc_caller)),
+                        .map(|(i, vin)| vin.into_operation(index, i, rpc_caller)),
                 )
                 .await
                 .into_iter()
@@ -239,7 +228,7 @@ impl BitcoinTransaction {
                     self.vout
                         .into_iter()
                         .enumerate()
-                        .map(|(i, vout)| vout.into_operation((i + vin_len) as i64, &self.hash))
+                        .map(|(i, vout)| vout.into_operation(i + vin_len, &self.hash))
                         .collect::<Vec<_>>(),
                 );
                 out
@@ -277,9 +266,9 @@ impl From<TxIn> for BitcoinVin {
     fn from(value: TxIn) -> Self {
         BitcoinVin {
             txid: Some(value.previous_output.txid.to_string()),
-            vout: Some(value.previous_output.vout as i64),
+            vout: Some(value.previous_output.vout as usize),
             scriptSig: Some(value.script_sig.into()),
-            sequence: value.sequence as usize,
+            sequence: value.sequence.0 as usize,
             coinbase: None,
         }
     }

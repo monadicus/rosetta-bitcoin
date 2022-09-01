@@ -21,7 +21,7 @@ use mentat_types::{AccountBalanceResponse, Amount, BlockIdentifier, Currency};
 pub struct ScanTxOutSetResult {
     // success: bool,
     // txouts: usize,
-    height: i64,
+    height: usize,
     bestblock: String,
     // unspents: Vec<Unspents>,
     total_amount: f64,

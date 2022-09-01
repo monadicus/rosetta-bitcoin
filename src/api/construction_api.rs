@@ -1,68 +1,14 @@
-//! rosetta construction api implementation for bitcoind using mentat
+//! rosetta construction api implementation for bitcoin using mentat
 
-use std::str::FromStr;
+use super::*;
+use bitcoin::Transaction;
 
-use bitcoin::{
-    hash_types::PubkeyHash,
-    psbt::serialize::{Deserialize, Serialize},
-    OutPoint,
-    Script,
-    Transaction,
-    TxIn,
-    TxOut,
-    Txid,
-    Witness,
-};
-use mentat_server::{
-    api::{CallerConstructionApi, ConstructionApi},
-    axum::async_trait,
-    indexmap::IndexMap,
-    serde_json::json,
-    server::RpcCaller,
-};
-use mentat_types::{
-    encode_to_hex_string,
-    AccountIdentifier,
-    Amount,
-    Caller,
-    Coin,
-    ConstructionCombineRequest,
-    ConstructionCombineResponse,
-    ConstructionDeriveRequest,
-    ConstructionDeriveResponse,
-    ConstructionHashRequest,
-    ConstructionMetadataRequest,
-    ConstructionMetadataResponse,
-    ConstructionParseRequest,
-    ConstructionParseResponse,
-    ConstructionPayloadsRequest,
-    ConstructionPayloadsResponse,
-    ConstructionPreprocessRequest,
-    ConstructionPreprocessResponse,
-    ConstructionSubmitRequest,
-    Currency,
-    MapErrMentat,
-    Result,
-    SignatureType,
-    SigningPayload,
-    TransactionIdentifier,
-    TransactionIdentifierResponse,
-};
-
-use crate::{
-    request::BitcoinJrpc,
-    responses::{
-        common::{BitcoinTransaction, FeeEstimate},
-        Response,
-    },
-};
-
-/// rosetta construction routes for bitcoind
+/// rosetta construction routes for bitcoin
 #[derive(Clone, Default)]
 pub struct BitcoinConstructionApi;
 
 #[async_trait]
-impl CallerConstructionApi for BitcoinConstructionApi {}
+impl ConstructionApiRouter for BitcoinConstructionApi {}
 
 #[async_trait]
 impl ConstructionApi for BitcoinConstructionApi {
@@ -182,9 +128,7 @@ impl ConstructionApi for BitcoinConstructionApi {
                 tx.vout
                     .into_iter()
                     .enumerate()
-                    .filter_map(|(i, vout)| {
-                        vout.into_operation((i + vin_len) as i64, &hash).account
-                    })
+                    .filter_map(|(i, vout)| vout.into_operation(i + vin_len, &hash).account)
                     .collect()
             } else {
                 Vec::new()
@@ -203,7 +147,7 @@ impl ConstructionApi for BitcoinConstructionApi {
     ) -> Result<ConstructionPayloadsResponse> {
         let mut tx = Transaction {
             version: 2,
-            lock_time: 0,
+            lock_time: PackedLockTime(0),
             input: vec![],
             output: vec![],
         };
@@ -231,7 +175,7 @@ impl ConstructionApi for BitcoinConstructionApi {
                 },
                 // This gets filled in later in `combine`.
                 script_sig: Script::new(),
-                sequence: u32::MAX,
+                sequence: Sequence(u32::MAX),
                 witness: Witness::new(),
             });
         }

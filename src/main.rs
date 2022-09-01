@@ -3,12 +3,9 @@
 #![deny(clippy::all, clippy::missing_docs_in_private_items)]
 #![warn(clippy::todo)]
 
-mod call_api;
-mod construction_api;
-mod data_api;
-mod indexer_api;
+mod api;
+use api::*;
 mod node;
-mod optional_api;
 mod request;
 mod responses;
 
@@ -19,10 +16,14 @@ use mentat_server::{mentat, server::ServerType};
 struct MentatBitcoin;
 
 impl ServerType for MentatBitcoin {
-    type CallApi = call_api::BitcoinCallApi;
-    type ConstructionApi = construction_api::BitcoinConstructionApi;
+    type AccountApi = BitcoinAccountApi;
+    type BlockApi = BitcoinBlockApi;
+    type CallApi = BitcoinCallApi;
+    type ConstructionApi = BitcoinConstructionApi;
+    type EventsApi = BitcoinEventsApi;
+    type MempoolsApi = BitcoinMempoolApi;
+    type NetworkApi = BitcoinNetworkApi;
+    type OptionalApi = BitcoinOptionalApi;
+    type SearchApi = BitcoinSearchApi;
     type CustomConfig = node::NodeConfig;
-    type DataApi = data_api::BitcoinDataApi;
-    type IndexerApi = indexer_api::BitcoinIndexerApi;
-    type OptionalApi = optional_api::BitcoinOptionalApi;
 }

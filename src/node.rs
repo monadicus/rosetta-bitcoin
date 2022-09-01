@@ -5,7 +5,7 @@ use std::{path::PathBuf, process::Command, str::FromStr};
 use mentat_asserter::Asserter;
 use mentat_server::{
     axum::async_trait,
-    conf::{Configuration, Network, NodeConf},
+    conf::{AsserterTable, Configuration, Network, NodeConf},
     reqwest::Url,
     serde::{Deserialize, Serialize},
 };
@@ -26,7 +26,7 @@ pub struct NodeConfig {
 impl NodeConf for NodeConfig {
     const BLOCKCHAIN: &'static str = "Bitcoin";
 
-    fn init_asserter(&self, network: &Network) -> Asserter {
+    fn init_asserters(&self, network: &Network) -> AsserterTable {
         Asserter::new_server(
             vec!["INPUT".into(), "OUTPUT".into(), "COINBASE".into()],
             true,
@@ -36,6 +36,7 @@ impl NodeConf for NodeConfig {
             None,
         )
         .unwrap()
+        .into()
     }
 
     fn build_url(conf: &Configuration<Self>) -> Url {

@@ -1,37 +1,14 @@
-//! The optional api endpoints for bitcoind.
+//! The optional api endpoints for bitcoin.
 
-use mentat_server::{
-    api::{CallerOptionalApi, OptionalApi},
-    axum::{async_trait, Json},
-    conf::{Mode, NodePid},
-    server::RpcCaller,
-    sysinfo::Pid,
-};
-use mentat_types::{
-    Caller,
-    HealthCheckResponse,
-    MentatResponse,
-    NodeConnections,
-    NodeNetwork,
-    Result,
-    Synced,
-};
+use super::*;
 
-use crate::{
-    request::BitcoinJrpc,
-    responses::{
-        data::{GetBlockchainInfoResponse, GetNetworkInfo},
-        *,
-    },
-};
-
-/// The optional api endpoints for bitcoind.
+/// The optional api endpoints for bitcoin.
 #[derive(Clone, Default)]
 pub struct BitcoinOptionalApi;
 
 // TODO: this is a clunky design pattern
 #[async_trait]
-impl CallerOptionalApi for BitcoinOptionalApi {
+impl OptionalApiRouter for BitcoinOptionalApi {
     async fn call_health(
         &self,
         caller: Caller,
@@ -40,14 +17,16 @@ impl CallerOptionalApi for BitcoinOptionalApi {
         server_pid: Pid,
         node_pid: NodePid,
     ) -> MentatResponse<HealthCheckResponse> {
-        self.health(caller, mode, rpc_caller, server_pid, node_pid)
-            .await
+        Ok(Json(
+            self.health(caller, mode, rpc_caller, server_pid, node_pid)
+                .await?,
+        ))
     }
 }
 
 #[async_trait]
 impl OptionalApi for BitcoinOptionalApi {
-    async fn synced(&self, rpc_caller: RpcCaller) -> MentatResponse<Synced> {
+    async fn synced(&self, rpc_caller: RpcCaller) -> Result<Synced> {
         let result = rpc_caller
             .rpc_call::<Response<GetBlockchainInfoResponse>>(BitcoinJrpc::new(
                 "getblockchaininfo",
@@ -55,10 +34,10 @@ impl OptionalApi for BitcoinOptionalApi {
             ))
             .await?;
 
-        Ok(Json(Synced {
+        Ok(Synced {
             local_tip: result.blocks,
             global_tip: result.headers,
-        }))
+        })
     }
 
     async fn node_address(&self, rpc_caller: &RpcCaller) -> Result<String> {

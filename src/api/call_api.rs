@@ -1,21 +1,13 @@
-//! rosetta call api implementation for bitcoind using mentat
+//! rosetta call api implementation for bitcoin using mentat
 
-use mentat_server::{
-    api::{CallApi, CallerCallApi},
-    axum::async_trait,
-    serde_json::Value,
-    server::RpcCaller,
-};
-use mentat_types::{CallRequest, CallResponse, Caller, Result};
+use super::*;
 
-use crate::{request::BitcoinJrpc, responses::Response};
-
-/// rosetta call routes for bitcoind
+/// rosetta call routes for bitcoin
 #[derive(Clone, Default)]
 pub struct BitcoinCallApi;
 
 #[async_trait]
-impl CallerCallApi for BitcoinCallApi {}
+impl CallApiRouter for BitcoinCallApi {}
 
 #[async_trait]
 impl CallApi for BitcoinCallApi {
