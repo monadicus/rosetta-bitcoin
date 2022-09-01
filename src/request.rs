@@ -14,7 +14,7 @@ pub fn trim_hash(hash: &str) -> &str {
     }
 }
 
-/// the rpc request structure for bitcoind
+/// the rpc request structure for bitcoin
 #[derive(Debug, Serialize)]
 #[serde(crate = "mentat_server::serde")]
 pub struct BitcoinJrpc {
@@ -29,7 +29,7 @@ pub struct BitcoinJrpc {
 }
 
 impl BitcoinJrpc {
-    /// create a new jrpc request for bitcoind
+    /// create a new jrpc request for bitcoin
     pub fn new<P: Serialize>(method: &str, params: &[P]) -> Self {
         Self {
             jsonrpc: "2.0".to_string(),

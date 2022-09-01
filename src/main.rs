@@ -3,26 +3,51 @@
 #![deny(clippy::all, clippy::missing_docs_in_private_items)]
 #![warn(clippy::todo)]
 
-mod call_api;
-mod construction_api;
-mod data_api;
-mod indexer_api;
+mod api;
+use api::*;
 mod node;
-mod optional_api;
 mod request;
 mod responses;
 
-use mentat_server::{mentat, server::ServerType};
+use mentat_asserter::Asserter;
+use mentat_server::{
+    conf::{AsserterTable, Configuration, NodeConf},
+    mentat,
+    server::ServerType,
+};
 
 /// The mentat rosetta-bitcoin.
 #[mentat]
 struct MentatBitcoin;
 
 impl ServerType for MentatBitcoin {
-    type CallApi = call_api::BitcoinCallApi;
-    type ConstructionApi = construction_api::BitcoinConstructionApi;
+    type AccountApi = BitcoinAccountApi;
+    type BlockApi = BitcoinBlockApi;
+    type CallApi = BitcoinCallApi;
+    type ConstructionApi = BitcoinConstructionApi;
     type CustomConfig = node::NodeConfig;
-    type DataApi = data_api::BitcoinDataApi;
-    type IndexerApi = indexer_api::BitcoinIndexerApi;
-    type OptionalApi = optional_api::BitcoinOptionalApi;
+    type EventsApi = BitcoinEventsApi;
+    type MempoolsApi = BitcoinMempoolApi;
+    type NetworkApi = BitcoinNetworkApi;
+    type OptionalApi = BitcoinOptionalApi;
+    type SearchApi = BitcoinSearchApi;
+
+    fn init_asserters(config: &Configuration<Self::CustomConfig>) -> AsserterTable {
+        Asserter::new_server(
+            vec!["INPUT".into(), "OUTPUT".into(), "COINBASE".into()],
+            true,
+            vec![
+                (
+                    Self::CustomConfig::BLOCKCHAIN,
+                    config.network.to_string().as_str(),
+                )
+                    .into(),
+            ],
+            Vec::new(),
+            false,
+            None,
+        )
+        .unwrap()
+        .into()
+    }
 }

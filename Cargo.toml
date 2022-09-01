@@ -29,7 +29,7 @@ mentat-server = { git = "https://github.com/monadicus/mentat" }
 mentat-types = { git = "https://github.com/monadicus/mentat" }
 futures = "0.3.21"
 hex = "0.4.3"
-bitcoin = "0.28.0"
+bitcoin = "0.29.1"
 
 # [patch."https://github.com/monadicus/mentat"]
 # mentat-asserter = { path = "../mentat/crates/mentat-asserter" }

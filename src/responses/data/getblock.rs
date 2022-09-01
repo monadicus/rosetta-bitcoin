@@ -13,11 +13,11 @@ use crate::responses::common::BitcoinTransaction;
 pub struct GetBlockResponse {
     pub hash: String,
     // confirmations: usize,
-    pub height: i64,
+    pub height: usize,
     pub version: usize,
     // versionHex: String,
     pub merkleroot: String,
-    pub time: i64,
+    pub time: usize,
     pub mediantime: i64,
     pub nonce: usize,
     pub bits: String,

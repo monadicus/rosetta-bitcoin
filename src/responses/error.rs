@@ -6,7 +6,7 @@
 use mentat_server::serde::Deserialize;
 use mentat_types::{MentatError, Result};
 
-/// the error response structure for bitcoind
+/// the error response structure for bitcoin
 #[derive(Clone, Debug, Deserialize)]
 #[serde(crate = "mentat_server::serde")]
 pub struct ErrorResponse {
