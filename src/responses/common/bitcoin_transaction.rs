@@ -11,8 +11,19 @@ use mentat_server::{
     server::RpcCaller,
 };
 use mentat_types::{
-    AccountIdentifier, Amount, CoinAction, CoinChange, CoinIdentifier, Currency, MapErrMentat,
-    MentatError, Operation, OperationIdentifier, Result, Transaction, TransactionIdentifier,
+    AccountIdentifier,
+    Amount,
+    CoinAction,
+    CoinChange,
+    CoinIdentifier,
+    Currency,
+    MapErrMentat,
+    MentatError,
+    Operation,
+    OperationIdentifier,
+    Result,
+    Transaction,
+    TransactionIdentifier,
 };
 
 use crate::{

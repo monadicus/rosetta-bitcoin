@@ -1,7 +1,8 @@
 //! rosetta construction api implementation for bitcoin using mentat
 
-use super::*;
 use bitcoin::Transaction;
+
+use super::*;
 
 /// rosetta construction routes for bitcoin
 #[derive(Clone, Default)]

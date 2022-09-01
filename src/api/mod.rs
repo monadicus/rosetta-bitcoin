@@ -17,25 +17,39 @@ pub use network_api::*;
 mod optional_api;
 pub use optional_api::*;
 mod search_api;
-pub use search_api::*;
+use std::str::FromStr;
 
-use crate::{
-    request::{trim_hash, BitcoinJrpc, ScanObjectsDescriptor},
-    responses::{
-        common::{BitcoinTransaction, FeeEstimate},
-        data::{
-            GetBlockResponse, GetBlockchainInfoResponse, GetNetworkInfo, PeerInfo,
-            ScanTxOutSetResult,
-        },
-        Address, Network, Response,
-    },
+use bitcoin::{
+    hash_types::PubkeyHash,
+    psbt::serialize::{Deserialize, Serialize},
+    OutPoint,
+    PackedLockTime,
+    Script,
+    Sequence,
+    TxIn,
+    TxOut,
+    Txid,
+    Witness,
 };
-
 use mentat_server::{
     api::{
-        AccountApi, AccountApiRouter, BlockApi, BlockApiRouter, CallApi, CallApiRouter,
-        ConstructionApi, ConstructionApiRouter, EventsApi, EventsApiRouter, MempoolApi,
-        MempoolApiRouter, NetworkApi, NetworkApiRouter, OptionalApi, OptionalApiRouter, SearchApi,
+        AccountApi,
+        AccountApiRouter,
+        BlockApi,
+        BlockApiRouter,
+        CallApi,
+        CallApiRouter,
+        ConstructionApi,
+        ConstructionApiRouter,
+        EventsApi,
+        EventsApiRouter,
+        MempoolApi,
+        MempoolApiRouter,
+        NetworkApi,
+        NetworkApiRouter,
+        OptionalApi,
+        OptionalApiRouter,
+        SearchApi,
         SearchApiRouter,
     },
     axum::{async_trait, Json},
@@ -46,11 +60,21 @@ use mentat_server::{
     sysinfo::Pid,
 };
 use mentat_types::*;
+pub use search_api::*;
 
-use std::str::FromStr;
-
-use bitcoin::{
-    hash_types::PubkeyHash,
-    psbt::serialize::{Deserialize, Serialize},
-    OutPoint, PackedLockTime, Script, Sequence, TxIn, TxOut, Txid, Witness,
+use crate::{
+    request::{trim_hash, BitcoinJrpc, ScanObjectsDescriptor},
+    responses::{
+        common::{BitcoinTransaction, FeeEstimate},
+        data::{
+            GetBlockResponse,
+            GetBlockchainInfoResponse,
+            GetNetworkInfo,
+            PeerInfo,
+            ScanTxOutSetResult,
+        },
+        Address,
+        Network,
+        Response,
+    },
 };
