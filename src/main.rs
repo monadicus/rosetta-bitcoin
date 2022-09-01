@@ -9,7 +9,12 @@ mod node;
 mod request;
 mod responses;
 
-use mentat_server::{mentat, server::ServerType};
+use mentat_asserter::Asserter;
+use mentat_server::{
+    conf::{AsserterTable, Configuration, NodeConf},
+    mentat,
+    server::ServerType,
+};
 
 /// The mentat rosetta-bitcoin.
 #[mentat]
@@ -26,4 +31,21 @@ impl ServerType for MentatBitcoin {
     type OptionalApi = BitcoinOptionalApi;
     type SearchApi = BitcoinSearchApi;
     type CustomConfig = node::NodeConfig;
+
+    fn init_asserters(config: &Configuration<Self::CustomConfig>) -> AsserterTable {
+        Asserter::new_server(
+            vec!["INPUT".into(), "OUTPUT".into(), "COINBASE".into()],
+            true,
+            vec![(
+                Self::CustomConfig::BLOCKCHAIN,
+                config.network.to_string().as_str(),
+            )
+                .into()],
+            Vec::new(),
+            false,
+            None,
+        )
+        .unwrap()
+        .into()
+    }
 }
