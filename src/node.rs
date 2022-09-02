@@ -25,19 +25,6 @@ pub struct BitcoinConfig {
 impl NodeConf for BitcoinConfig {
     const BLOCKCHAIN: &'static str = "Bitcoin";
 
-    fn build_url(conf: &Configuration<Self>) -> Url {
-        let url = format!(
-            "{}://{}:{}@{}:{}",
-            if conf.secure_http { "https" } else { "http" },
-            conf.custom.user,
-            conf.custom.pass,
-            conf.node_address,
-            conf.node_rpc_port
-        );
-
-        Url::from_str(&url).expect("Invalid node url: {url}")
-    }
-
     fn node_command(config: &Configuration<Self>) -> Command {
         let mut command = Command::new(&config.node_path);
         command.args(&[
@@ -55,5 +42,22 @@ impl NodeConf for BitcoinConfig {
             &format!("--datadir={}", config.custom.data_dir.display()),
         ]);
         command
+    }
+}
+
+impl BitcoinConfig {
+    /// Builds the url used to call the node using the settings in the user
+    /// config
+    pub fn build_url(conf: &Configuration<Self>) -> Url {
+        let url = format!(
+            "{}://{}:{}@{}:{}",
+            if conf.secure_http { "https" } else { "http" },
+            conf.custom.user,
+            conf.custom.pass,
+            conf.node_address,
+            conf.node_rpc_port
+        );
+
+        Url::from_str(&url).expect("Invalid node url: {url}")
     }
 }

@@ -3,7 +3,6 @@
 use std::fmt::Debug;
 
 use mentat_server::{
-    conf::NodeConf,
     macro_exports::Configuration,
     reqwest,
     serde::{de::DeserializeOwned, Serialize},
@@ -63,7 +62,7 @@ impl From<Configuration<BitcoinConfig>> for BitcoinCaller {
     fn from(conf: Configuration<BitcoinConfig>) -> Self {
         Self {
             client: reqwest::Client::new(),
-            node_rpc_url: NodeConf::build_url(&conf),
+            node_rpc_url: BitcoinConfig::build_url(&conf),
         }
     }
 }
