@@ -10,8 +10,19 @@ use mentat_server::{
     serde_json::{self, json},
 };
 use mentat_types::{
-    AccountIdentifier, Amount, CoinAction, CoinChange, CoinIdentifier, Currency, MapErrMentat,
-    MentatError, Operation, OperationIdentifier, Result, Transaction, TransactionIdentifier,
+    AccountIdentifier,
+    Amount,
+    CoinAction,
+    CoinChange,
+    CoinIdentifier,
+    Currency,
+    MapErrMentat,
+    MentatError,
+    Operation,
+    OperationIdentifier,
+    Result,
+    Transaction,
+    TransactionIdentifier,
 };
 
 use crate::request::{trim_hash, BitcoinCaller, BitcoinJrpc};

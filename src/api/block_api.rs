@@ -27,18 +27,12 @@ impl BlockApi for BitcoinBlockApi {
                 .await?
         } else {
             node_caller
-                .rpc_call::<String>(BitcoinJrpc::new(
-                    "getbestblockhash",
-                    &[] as &[u8],
-                ))
+                .rpc_call::<String>(BitcoinJrpc::new("getbestblockhash", &[] as &[u8]))
                 .await?
         };
 
         node_caller
-            .rpc_call::<GetBlockResponse>(BitcoinJrpc::new(
-                "getblock",
-                &[json!(hash), json!(2)],
-            ))
+            .rpc_call::<GetBlockResponse>(BitcoinJrpc::new("getblock", &[json!(hash), json!(2)]))
             .await?
             .into_block_response(node_caller)
             .await

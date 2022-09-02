@@ -1,6 +1,6 @@
 //! rpc requests
 
-use crate::{node::BitcoinConfig, responses::BitcoinResponse};
+use std::fmt::Debug;
 
 use mentat_server::{
     conf::NodeConf,
@@ -11,7 +11,7 @@ use mentat_server::{
 };
 use mentat_types::{MapErrMentat, Result};
 
-use std::fmt::Debug;
+use crate::{node::BitcoinConfig, responses::BitcoinResponse};
 
 /// the rpc request structure for bitcoin
 #[derive(Debug, Serialize)]

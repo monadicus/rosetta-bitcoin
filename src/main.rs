@@ -27,23 +27,25 @@ impl ServerType for MentatBitcoin {
     type BlockApi = BitcoinBlockApi;
     type CallApi = BitcoinCallApi;
     type ConstructionApi = BitcoinConstructionApi;
+    type CustomConfig = BitcoinConfig;
     type EventsApi = BitcoinEventsApi;
     type MempoolsApi = BitcoinMempoolApi;
     type NetworkApi = BitcoinNetworkApi;
+    type NodeCaller = BitcoinCaller;
     type OptionalApi = BitcoinOptionalApi;
     type SearchApi = BitcoinSearchApi;
-    type NodeCaller = BitcoinCaller;
-    type CustomConfig = BitcoinConfig;
 
     fn init_asserters(config: &Configuration<Self::CustomConfig>) -> AsserterTable {
         Asserter::new_server(
             vec!["INPUT".into(), "OUTPUT".into(), "COINBASE".into()],
             true,
-            vec![(
-                Self::CustomConfig::BLOCKCHAIN,
-                config.network.to_string().as_str(),
-            )
-                .into()],
+            vec![
+                (
+                    Self::CustomConfig::BLOCKCHAIN,
+                    config.network.to_string().as_str(),
+                )
+                    .into(),
+            ],
             Vec::new(),
             false,
             None,

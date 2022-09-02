@@ -68,10 +68,7 @@ impl AccountApi for BitcoinAccountApi {
         };
 
         Ok(node_caller
-            .rpc_call::<ScanTxOutSetResult>(BitcoinJrpc::new(
-                "scantxoutset",
-                &args,
-            ))
+            .rpc_call::<ScanTxOutSetResult>(BitcoinJrpc::new("scantxoutset", &args))
             .await?
             .into_balance(id))
     }

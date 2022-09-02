@@ -44,10 +44,7 @@ impl OptionalApi for BitcoinOptionalApi {
 
     async fn node_address(&self, node_caller: &Self::NodeCaller) -> Result<String> {
         let result = node_caller
-            .rpc_call::<Vec<Address>>(BitcoinJrpc::new(
-                "getnodeaddresses",
-                &[] as &[()],
-            ))
+            .rpc_call::<Vec<Address>>(BitcoinJrpc::new("getnodeaddresses", &[] as &[()]))
             .await?;
 
         Ok(result[0].address.clone())
@@ -62,10 +59,7 @@ impl OptionalApi for BitcoinOptionalApi {
             Ok(Some(NodeConnections::Offline))
         } else {
             let result = node_caller
-                .rpc_call::<GetNetworkInfo>(BitcoinJrpc::new(
-                    "getnetworkinfo",
-                    &[] as &[()],
-                ))
+                .rpc_call::<GetNetworkInfo>(BitcoinJrpc::new("getnetworkinfo", &[] as &[()]))
                 .await?;
 
             Ok(Some(NodeConnections::Online {
@@ -85,10 +79,7 @@ impl OptionalApi for BitcoinOptionalApi {
             Ok(Some(NodeNetwork::Offline))
         } else {
             let result = node_caller
-                .rpc_call::<Network>(BitcoinJrpc::new(
-                    "getnettotals",
-                    &[] as &[()],
-                ))
+                .rpc_call::<Network>(BitcoinJrpc::new("getnettotals", &[] as &[()]))
                 .await?;
 
             Ok(Some(NodeNetwork::Online {
