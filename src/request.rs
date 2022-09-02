@@ -3,7 +3,7 @@
 use std::fmt::Debug;
 
 use mentat_server::{
-    macro_exports::Configuration,
+    conf::Configuration,
     reqwest,
     serde::{de::DeserializeOwned, Serialize},
     serde_json::{self, json, Value},
