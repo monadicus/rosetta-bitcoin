@@ -31,7 +31,7 @@ futures = "0.3.21"
 hex = "0.4.3"
 bitcoin = "0.29.1"
 
-# [patch."https://github.com/monadicus/mentat"]
-# mentat-asserter = { path = "../mentat/crates/mentat-asserter" }
-# mentat-server = { path = "../mentat/crates/mentat-server" }
-# mentat-types = { path = "../mentat/crates/mentat-types" }
+[patch."https://github.com/monadicus/mentat"]
+mentat-asserter = { path = "../mentat/crates/mentat-asserter" }
+mentat-server = { path = "../mentat/crates/mentat-server" }
+mentat-types = { path = "../mentat/crates/mentat-types" }

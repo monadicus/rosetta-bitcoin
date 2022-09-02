@@ -4,39 +4,35 @@ use std::fmt::Debug;
 
 use mentat_server::{
     serde::{de::DeserializeOwned, Deserialize},
-    server::RpcResponse,
     tracing,
 };
 use mentat_types::Result;
 
 use super::ErrorResponse;
-use crate::request::BitcoinJrpc;
 
 /// the response structure for bitcoin
 #[derive(Clone, Debug, Deserialize)]
 #[serde(crate = "mentat_server::serde")]
-pub struct Response<R> {
+pub struct BitcoinResponse<R> {
     /// a successful bitcoind response
     pub result: Option<R>,
     /// a bitcoind error response
     pub error: Option<ErrorResponse>,
 }
 
-impl<O> RpcResponse for Response<O>
-where
-    O: Debug + DeserializeOwned,
-{
-    type I = BitcoinJrpc;
-    type O = O;
-
-    fn unwrap_response(self) -> Result<Self::O> {
-        tracing::debug!("res: {self:#?}");
+impl<R> BitcoinResponse<R> {
+    /// converts the server response into a result
+    pub fn into_result(self) -> Result<R>
+    where
+        R: Debug + DeserializeOwned,
+    {
+        tracing::debug!("res: {self:?}");
         match self {
-            Response {
+            BitcoinResponse {
                 result: Some(res),
                 error: None,
             } => Ok(res),
-            Response {
+            BitcoinResponse {
                 result: None,
                 error: Some(err),
             } => err.into(),

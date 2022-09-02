@@ -11,14 +11,16 @@ impl MempoolApiRouter for BitcoinMempoolApi {}
 
 #[async_trait]
 impl MempoolApi for BitcoinMempoolApi {
+    type NodeCaller = BitcoinCaller;
+
     async fn mempool(
         &self,
         _caller: Caller,
         _data: NetworkRequest,
-        rpc_caller: RpcCaller,
+        node_caller: &Self::NodeCaller,
     ) -> Result<MempoolResponse> {
-        let transaction_identifiers = rpc_caller
-            .rpc_call::<Response<Vec<String>>>(BitcoinJrpc::new("getrawmempool", &[] as &[u8]))
+        let transaction_identifiers = node_caller
+            .rpc_call::<Vec<String>>(BitcoinJrpc::new("getrawmempool", &[] as &[u8]))
             .await?
             .into_iter()
             .map(|hash| TransactionIdentifier { hash })
@@ -32,11 +34,11 @@ impl MempoolApi for BitcoinMempoolApi {
         &self,
         _caller: Caller,
         data: MempoolTransactionRequest,
-        rpc_caller: RpcCaller,
+        node_caller: &Self::NodeCaller,
     ) -> Result<MempoolTransactionResponse> {
         let tx_hash = trim_hash(&data.transaction_identifier.hash);
-        let mempool = rpc_caller
-            .rpc_call::<Response<Vec<String>>>(BitcoinJrpc::new("getrawmempool", &[] as &[u8]))
+        let mempool = node_caller
+            .rpc_call::<Vec<String>>(BitcoinJrpc::new("getrawmempool", &[] as &[u8]))
             .await?;
 
         if let Some((i, _)) = mempool
@@ -44,13 +46,13 @@ impl MempoolApi for BitcoinMempoolApi {
             .enumerate()
             .find(|(_, id)| id.as_str() == tx_hash)
         {
-            let transaction = rpc_caller
-                .rpc_call::<Response<BitcoinTransaction>>(BitcoinJrpc::new(
+            let transaction = node_caller
+                .rpc_call::<BitcoinTransaction>(BitcoinJrpc::new(
                     "getrawtransaction",
                     &[json!(tx_hash), json!(true)],
                 ))
                 .await?
-                .into_transaction(i, &rpc_caller)
+                .into_transaction(i, node_caller)
                 .await?;
             Ok(MempoolTransactionResponse {
                 transaction,

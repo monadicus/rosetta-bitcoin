@@ -22,59 +22,32 @@ use std::str::FromStr;
 use bitcoin::{
     hash_types::PubkeyHash,
     psbt::serialize::{Deserialize, Serialize},
-    OutPoint,
-    PackedLockTime,
-    Script,
-    Sequence,
-    TxIn,
-    TxOut,
-    Txid,
-    Witness,
+    OutPoint, PackedLockTime, Script, Sequence, TxIn, TxOut, Txid, Witness,
 };
 use mentat_server::{
     api::{
-        AccountApi,
-        AccountApiRouter,
-        BlockApi,
-        BlockApiRouter,
-        CallApi,
-        CallApiRouter,
-        ConstructionApi,
-        ConstructionApiRouter,
-        EventsApi,
-        EventsApiRouter,
-        MempoolApi,
-        MempoolApiRouter,
-        NetworkApi,
-        NetworkApiRouter,
-        OptionalApi,
-        OptionalApiRouter,
-        SearchApi,
+        AccountApi, AccountApiRouter, BlockApi, BlockApiRouter, CallApi, CallApiRouter,
+        ConstructionApi, ConstructionApiRouter, EventsApi, EventsApiRouter, MempoolApi,
+        MempoolApiRouter, NetworkApi, NetworkApiRouter, OptionalApi, OptionalApiRouter, SearchApi,
         SearchApiRouter,
     },
     axum::{async_trait, Json},
     conf::{Mode, NodePid},
     indexmap::IndexMap,
     serde_json::{json, Value},
-    server::RpcCaller,
     sysinfo::Pid,
 };
 use mentat_types::*;
 pub use search_api::*;
 
 use crate::{
-    request::{trim_hash, BitcoinJrpc, ScanObjectsDescriptor},
+    request::{trim_hash, BitcoinCaller, BitcoinJrpc, ScanObjectsDescriptor},
     responses::{
         common::{BitcoinTransaction, FeeEstimate},
         data::{
-            GetBlockResponse,
-            GetBlockchainInfoResponse,
-            GetNetworkInfo,
-            PeerInfo,
+            GetBlockResponse, GetBlockchainInfoResponse, GetNetworkInfo, PeerInfo,
             ScanTxOutSetResult,
         },
-        Address,
-        Network,
-        Response,
+        Address, Network,
     },
 };

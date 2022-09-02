@@ -1,10 +1,10 @@
 //! a bitcoind getblock response
 
 use futures::future::join_all;
-use mentat_server::{serde::Deserialize, server::RpcCaller};
+use mentat_server::serde::Deserialize;
 use mentat_types::{Block, BlockIdentifier, BlockResponse, Result};
 
-use crate::responses::common::BitcoinTransaction;
+use crate::{request::BitcoinCaller, responses::common::BitcoinTransaction};
 
 /// a bitcoind getblock response
 #[allow(non_snake_case, clippy::missing_docs_in_private_items)]
@@ -36,14 +36,14 @@ impl GetBlockResponse {
     /// convert GetBlock into a rosetta `BlockResponse`.
     /// makes calls to the bitcoind node during the conversion to get
     /// transaction info
-    pub async fn into_block_response(self, rpc_caller: &RpcCaller) -> Result<BlockResponse> {
+    pub async fn into_block_response(self, node_caller: &BitcoinCaller) -> Result<BlockResponse> {
         Ok(BlockResponse {
             block: Some(Block {
                 transactions: join_all(
                     self.tx
                         .into_iter()
                         .enumerate()
-                        .map(|(i, tx)| tx.into_transaction(i, rpc_caller)),
+                        .map(|(i, tx)| tx.into_transaction(i, node_caller)),
                 )
                 .await
                 .into_iter()

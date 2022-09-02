@@ -6,7 +6,9 @@
 mod api;
 use api::*;
 mod node;
+use node::NodeConfig;
 mod request;
+use request::BitcoinCaller;
 mod responses;
 
 use mentat_asserter::Asserter;
@@ -25,24 +27,23 @@ impl ServerType for MentatBitcoin {
     type BlockApi = BitcoinBlockApi;
     type CallApi = BitcoinCallApi;
     type ConstructionApi = BitcoinConstructionApi;
-    type CustomConfig = node::NodeConfig;
     type EventsApi = BitcoinEventsApi;
     type MempoolsApi = BitcoinMempoolApi;
     type NetworkApi = BitcoinNetworkApi;
     type OptionalApi = BitcoinOptionalApi;
     type SearchApi = BitcoinSearchApi;
+    type NodeCaller = BitcoinCaller;
+    type CustomConfig = NodeConfig;
 
     fn init_asserters(config: &Configuration<Self::CustomConfig>) -> AsserterTable {
         Asserter::new_server(
             vec!["INPUT".into(), "OUTPUT".into(), "COINBASE".into()],
             true,
-            vec![
-                (
-                    Self::CustomConfig::BLOCKCHAIN,
-                    config.network.to_string().as_str(),
-                )
-                    .into(),
-            ],
+            vec![(
+                Self::CustomConfig::BLOCKCHAIN,
+                config.network.to_string().as_str(),
+            )
+                .into()],
             Vec::new(),
             false,
             None,

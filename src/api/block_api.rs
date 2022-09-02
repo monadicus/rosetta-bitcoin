@@ -11,31 +11,36 @@ impl BlockApiRouter for BitcoinBlockApi {}
 
 #[async_trait]
 impl BlockApi for BitcoinBlockApi {
+    type NodeCaller = BitcoinCaller;
+
     async fn block(
         &self,
         _caller: Caller,
         data: BlockRequest,
-        rpc_caller: RpcCaller,
+        node_caller: &Self::NodeCaller,
     ) -> Result<BlockResponse> {
         let hash = if let Some(block_hash) = data.block_identifier.hash {
             trim_hash(&block_hash).to_string()
         } else if let Some(block_id) = data.block_identifier.index {
-            rpc_caller
-                .rpc_call::<Response<String>>(BitcoinJrpc::new("getblockhash", &[block_id]))
+            node_caller
+                .rpc_call::<String>(BitcoinJrpc::new("getblockhash", &[block_id]))
                 .await?
         } else {
-            rpc_caller
-                .rpc_call::<Response<String>>(BitcoinJrpc::new("getbestblockhash", &[] as &[u8]))
+            node_caller
+                .rpc_call::<String>(BitcoinJrpc::new(
+                    "getbestblockhash",
+                    &[] as &[u8],
+                ))
                 .await?
         };
 
-        rpc_caller
-            .rpc_call::<Response<GetBlockResponse>>(BitcoinJrpc::new(
+        node_caller
+            .rpc_call::<GetBlockResponse>(BitcoinJrpc::new(
                 "getblock",
                 &[json!(hash), json!(2)],
             ))
             .await?
-            .into_block_response(&rpc_caller)
+            .into_block_response(node_caller)
             .await
     }
 
@@ -43,13 +48,13 @@ impl BlockApi for BitcoinBlockApi {
         &self,
         _caller: Caller,
         data: BlockTransactionRequest,
-        rpc_caller: RpcCaller,
+        node_caller: &Self::NodeCaller,
     ) -> Result<BlockTransactionResponse> {
         let block_hash = trim_hash(&data.block_identifier.hash);
         let tx_hash = trim_hash(&data.transaction_identifier.hash);
 
-        let block = rpc_caller
-            .rpc_call::<Response<GetBlockResponse>>(BitcoinJrpc::new(
+        let block = node_caller
+            .rpc_call::<GetBlockResponse>(BitcoinJrpc::new(
                 "getblock",
                 &[json!(block_hash), json!(2u32)],
             ))
@@ -62,7 +67,7 @@ impl BlockApi for BitcoinBlockApi {
             .find(|(_, tx)| tx.hash == tx_hash)
         {
             Ok(BlockTransactionResponse {
-                transaction: tx.into_transaction(i, &rpc_caller).await?,
+                transaction: tx.into_transaction(i, node_caller).await?,
             })
         } else {
             MentatError::transaction_not_found(Some(&data.transaction_identifier.hash))
