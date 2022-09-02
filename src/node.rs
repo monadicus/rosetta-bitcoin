@@ -12,7 +12,7 @@ use mentat_server::{
 /// configuration information/logic for the bitcoind node
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(crate = "mentat_server::serde")]
-pub struct NodeConfig {
+pub struct BitcoinConfig {
     /// where to store blocks and other data
     data_dir: PathBuf,
     /// the username to set on bitcoind
@@ -22,7 +22,7 @@ pub struct NodeConfig {
 }
 
 #[async_trait]
-impl NodeConf for NodeConfig {
+impl NodeConf for BitcoinConfig {
     const BLOCKCHAIN: &'static str = "Bitcoin";
 
     fn build_url(conf: &Configuration<Self>) -> Url {

@@ -1,6 +1,6 @@
 //! rpc requests
 
-use crate::{node::NodeConfig, responses::BitcoinResponse};
+use crate::{node::BitcoinConfig, responses::BitcoinResponse};
 
 use mentat_server::{
     conf::NodeConf,
@@ -59,8 +59,8 @@ pub struct BitcoinCaller {
     pub node_rpc_url: reqwest::Url,
 }
 
-impl From<Configuration<NodeConfig>> for BitcoinCaller {
-    fn from(conf: Configuration<NodeConfig>) -> Self {
+impl From<Configuration<BitcoinConfig>> for BitcoinCaller {
+    fn from(conf: Configuration<BitcoinConfig>) -> Self {
         Self {
             client: reqwest::Client::new(),
             node_rpc_url: NodeConf::build_url(&conf),

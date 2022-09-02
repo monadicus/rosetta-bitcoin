@@ -6,7 +6,7 @@
 mod api;
 use api::*;
 mod node;
-use node::NodeConfig;
+use node::BitcoinConfig;
 mod request;
 use request::BitcoinCaller;
 mod responses;
@@ -33,7 +33,7 @@ impl ServerType for MentatBitcoin {
     type OptionalApi = BitcoinOptionalApi;
     type SearchApi = BitcoinSearchApi;
     type NodeCaller = BitcoinCaller;
-    type CustomConfig = NodeConfig;
+    type CustomConfig = BitcoinConfig;
 
     fn init_asserters(config: &Configuration<Self::CustomConfig>) -> AsserterTable {
         Asserter::new_server(
