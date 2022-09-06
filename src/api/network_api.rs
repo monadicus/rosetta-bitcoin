@@ -11,14 +11,16 @@ impl NetworkApiRouter for BitcoinNetworkApi {}
 
 #[async_trait]
 impl NetworkApi for BitcoinNetworkApi {
+    type NodeCaller = BitcoinCaller;
+
     async fn network_list(
         &self,
         _caller: Caller,
         _data: MetadataRequest,
-        rpc_caller: RpcCaller,
+        node_caller: &Self::NodeCaller,
     ) -> Result<NetworkListResponse> {
-        Ok(rpc_caller
-            .rpc_call::<Response<GetBlockchainInfoResponse>>(BitcoinJrpc::new(
+        Ok(node_caller
+            .rpc_call::<GetBlockchainInfoResponse>(BitcoinJrpc::new(
                 "getblockchaininfo",
                 &[] as &[u8],
             ))
@@ -31,18 +33,15 @@ impl NetworkApi for BitcoinNetworkApi {
         &self,
         _caller: Caller,
         _data: NetworkRequest,
-        rpc_caller: RpcCaller,
+        node_caller: &Self::NodeCaller,
     ) -> Result<NetworkOptionsResponse> {
         Ok(NetworkOptionsResponse {
             version: Version {
                 // TODO: fetch this
                 // This is just the current Rosetta version for now
                 rosetta_version: "1.4.12".to_owned(),
-                node_version: rpc_caller
-                    .rpc_call::<Response<GetNetworkInfo>>(BitcoinJrpc::new(
-                        "getnetworkinfo",
-                        &[] as &[u8],
-                    ))
+                node_version: node_caller
+                    .rpc_call::<GetNetworkInfo>(BitcoinJrpc::new("getnetworkinfo", &[] as &[u8]))
                     .await?
                     .version()
                     .to_string(),
@@ -80,23 +79,23 @@ impl NetworkApi for BitcoinNetworkApi {
         &self,
         _caller: Caller,
         _data: NetworkRequest,
-        rpc_caller: RpcCaller,
+        node_caller: &Self::NodeCaller,
     ) -> Result<NetworkStatusResponse> {
-        let current_hash = rpc_caller
-            .rpc_call::<Response<String>>(BitcoinJrpc::new("getbestblockhash", &[] as &[u8]))
+        let current_hash = node_caller
+            .rpc_call::<String>(BitcoinJrpc::new("getbestblockhash", &[] as &[u8]))
             .await?;
-        let current_block = rpc_caller
-            .rpc_call::<Response<GetBlockResponse>>(BitcoinJrpc::new(
+        let current_block = node_caller
+            .rpc_call::<GetBlockResponse>(BitcoinJrpc::new(
                 "getblock",
                 &[json!(current_hash), json!(2)],
             ))
             .await?;
 
-        let genesis_hash = rpc_caller
-            .rpc_call::<Response<String>>(BitcoinJrpc::new("getblockhash", &[0]))
+        let genesis_hash = node_caller
+            .rpc_call::<String>(BitcoinJrpc::new("getblockhash", &[0]))
             .await?;
-        let genesis_block = rpc_caller
-            .rpc_call::<Response<GetBlockResponse>>(BitcoinJrpc::new(
+        let genesis_block = node_caller
+            .rpc_call::<GetBlockResponse>(BitcoinJrpc::new(
                 "getblock",
                 &[json!(genesis_hash), json!(2)],
             ))
@@ -114,8 +113,8 @@ impl NetworkApi for BitcoinNetworkApi {
             },
             oldest_block_identifier: None,
             sync_status: None,
-            peers: rpc_caller
-                .rpc_call::<Response<Vec<PeerInfo>>>(BitcoinJrpc::new("getpeerinfo", &[] as &[u8]))
+            peers: node_caller
+                .rpc_call::<Vec<PeerInfo>>(BitcoinJrpc::new("getpeerinfo", &[] as &[u8]))
                 .await?
                 .into_iter()
                 .map(|p| p.into())

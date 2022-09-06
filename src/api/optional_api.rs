@@ -13,12 +13,12 @@ impl OptionalApiRouter for BitcoinOptionalApi {
         &self,
         caller: Caller,
         mode: &Mode,
-        rpc_caller: RpcCaller,
+        node_caller: &Self::NodeCaller,
         server_pid: Pid,
         node_pid: NodePid,
     ) -> MentatResponse<HealthCheckResponse> {
         Ok(Json(
-            self.health(caller, mode, rpc_caller, server_pid, node_pid)
+            self.health(caller, mode, node_caller, server_pid, node_pid)
                 .await?,
         ))
     }
@@ -26,9 +26,11 @@ impl OptionalApiRouter for BitcoinOptionalApi {
 
 #[async_trait]
 impl OptionalApi for BitcoinOptionalApi {
-    async fn synced(&self, rpc_caller: RpcCaller) -> Result<Synced> {
-        let result = rpc_caller
-            .rpc_call::<Response<GetBlockchainInfoResponse>>(BitcoinJrpc::new(
+    type NodeCaller = BitcoinCaller;
+
+    async fn synced(&self, node_caller: &Self::NodeCaller) -> Result<Synced> {
+        let result = node_caller
+            .rpc_call::<GetBlockchainInfoResponse>(BitcoinJrpc::new(
                 "getblockchaininfo",
                 &[] as &[()],
             ))
@@ -40,9 +42,9 @@ impl OptionalApi for BitcoinOptionalApi {
         })
     }
 
-    async fn node_address(&self, rpc_caller: &RpcCaller) -> Result<String> {
-        let result = rpc_caller
-            .rpc_call::<Response<Vec<Address>>>(BitcoinJrpc::new("getnodeaddresses", &[] as &[()]))
+    async fn node_address(&self, node_caller: &Self::NodeCaller) -> Result<String> {
+        let result = node_caller
+            .rpc_call::<Vec<Address>>(BitcoinJrpc::new("getnodeaddresses", &[] as &[()]))
             .await?;
 
         Ok(result[0].address.clone())
@@ -51,16 +53,13 @@ impl OptionalApi for BitcoinOptionalApi {
     async fn node_connections(
         &self,
         mode: &Mode,
-        rpc_caller: &RpcCaller,
+        node_caller: &Self::NodeCaller,
     ) -> Result<Option<NodeConnections>> {
         if mode.is_offline() {
             Ok(Some(NodeConnections::Offline))
         } else {
-            let result = rpc_caller
-                .rpc_call::<Response<GetNetworkInfo>>(BitcoinJrpc::new(
-                    "getnetworkinfo",
-                    &[] as &[()],
-                ))
+            let result = node_caller
+                .rpc_call::<GetNetworkInfo>(BitcoinJrpc::new("getnetworkinfo", &[] as &[()]))
                 .await?;
 
             Ok(Some(NodeConnections::Online {
@@ -74,13 +73,13 @@ impl OptionalApi for BitcoinOptionalApi {
     async fn node_net_usage(
         &self,
         mode: &Mode,
-        rpc_caller: &RpcCaller,
+        node_caller: &Self::NodeCaller,
     ) -> Result<Option<NodeNetwork>> {
         if mode.is_offline() {
             Ok(Some(NodeNetwork::Offline))
         } else {
-            let result = rpc_caller
-                .rpc_call::<Response<Network>>(BitcoinJrpc::new("getnettotals", &[] as &[()]))
+            let result = node_caller
+                .rpc_call::<Network>(BitcoinJrpc::new("getnettotals", &[] as &[()]))
                 .await?;
 
             Ok(Some(NodeNetwork::Online {

@@ -11,6 +11,8 @@ impl CallApiRouter for BitcoinCallApi {}
 
 #[async_trait]
 impl CallApi for BitcoinCallApi {
+    type NodeCaller = BitcoinCaller;
+
     // TODO associated constant ROUTES that contains a CallRoute struct with all
     // routes and idempotent status      probably shouldnt check if route is
     // valid before calling though, let node handle that
@@ -19,10 +21,10 @@ impl CallApi for BitcoinCallApi {
         &self,
         _caller: Caller,
         data: CallRequest,
-        rpc_caller: RpcCaller,
+        node_caller: &Self::NodeCaller,
     ) -> Result<CallResponse> {
-        let result = rpc_caller
-            .rpc_call::<Response<Value>>(BitcoinJrpc::new(
+        let result = node_caller
+            .rpc_call::<Value>(BitcoinJrpc::new(
                 &data.method,
                 &data
                     .parameters

@@ -6,7 +6,9 @@
 mod api;
 use api::*;
 mod node;
+use node::BitcoinConfig;
 mod request;
+use request::BitcoinCaller;
 mod responses;
 
 use mentat_asserter::Asserter;
@@ -25,10 +27,11 @@ impl ServerType for MentatBitcoin {
     type BlockApi = BitcoinBlockApi;
     type CallApi = BitcoinCallApi;
     type ConstructionApi = BitcoinConstructionApi;
-    type CustomConfig = node::NodeConfig;
+    type CustomConfig = BitcoinConfig;
     type EventsApi = BitcoinEventsApi;
     type MempoolsApi = BitcoinMempoolApi;
     type NetworkApi = BitcoinNetworkApi;
+    type NodeCaller = BitcoinCaller;
     type OptionalApi = BitcoinOptionalApi;
     type SearchApi = BitcoinSearchApi;
 

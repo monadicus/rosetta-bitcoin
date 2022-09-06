@@ -1,18 +1,16 @@
 //! rpc requests
 
-use mentat_server::{
-    serde::Serialize,
-    serde_json::{json, Value},
-};
+use std::fmt::Debug;
 
-/// helper function to trim `0x` from hashes
-pub fn trim_hash(hash: &str) -> &str {
-    if let Some(h) = hash.strip_prefix("0x") {
-        h
-    } else {
-        hash
-    }
-}
+use mentat_server::{
+    conf::Configuration,
+    reqwest,
+    serde::{de::DeserializeOwned, Serialize},
+    serde_json::{self, json, Value},
+};
+use mentat_types::{MapErrMentat, Result};
+
+use crate::{node::BitcoinConfig, responses::BitcoinResponse};
 
 /// the rpc request structure for bitcoin
 #[derive(Debug, Serialize)]
@@ -48,4 +46,49 @@ pub struct ScanObjectsDescriptor {
     pub desc: String,
     /// block end range
     pub range: i64,
+}
+
+/// The `RpcCaller` struct is a wrapper to hold a rpc caller instance
+/// that holds a request client and the url for the RPC.
+#[derive(Clone, Debug)]
+pub struct BitcoinCaller {
+    /// The request client.
+    pub client: reqwest::Client,
+    /// The RPC url.
+    pub node_rpc_url: reqwest::Url,
+}
+
+impl From<Configuration<BitcoinConfig>> for BitcoinCaller {
+    fn from(conf: Configuration<BitcoinConfig>) -> Self {
+        Self {
+            client: reqwest::Client::new(),
+            node_rpc_url: BitcoinConfig::build_url(&conf),
+        }
+    }
+}
+
+impl BitcoinCaller {
+    /// Makes the RPC call returning the expected output given the input type.
+    pub async fn rpc_call<O: DeserializeOwned + Debug>(&self, req: BitcoinJrpc) -> Result<O> {
+        let resp = self
+            .client
+            .post(self.node_rpc_url.clone())
+            .json(&req)
+            .send()
+            .await?;
+
+        let resp_text = resp.text().await?;
+        let response_type = serde_json::from_str::<BitcoinResponse<O>>(&resp_text)
+            .merr(|e| format!("failed to serialize response: `{e}`\ntext: `{resp_text}`"))?;
+        response_type.into_result()
+    }
+}
+
+/// helper function to trim `0x` from hashes
+pub fn trim_hash(hash: &str) -> &str {
+    if let Some(h) = hash.strip_prefix("0x") {
+        h
+    } else {
+        hash
+    }
 }

@@ -13,11 +13,13 @@ impl ConstructionApiRouter for BitcoinConstructionApi {}
 
 #[async_trait]
 impl ConstructionApi for BitcoinConstructionApi {
+    type NodeCaller = BitcoinCaller;
+
     async fn combine(
         &self,
         _caller: Caller,
         data: ConstructionCombineRequest,
-        _rpc_caller: RpcCaller,
+        _node_caller: &Self::NodeCaller,
     ) -> Result<ConstructionCombineResponse> {
         let mut tx = Transaction::deserialize(
             &hex::decode(data.unsigned_transaction)
@@ -37,13 +39,13 @@ impl ConstructionApi for BitcoinConstructionApi {
         &self,
         _caller: Caller,
         data: ConstructionDeriveRequest,
-        rpc_caller: RpcCaller,
+        node_caller: &Self::NodeCaller,
     ) -> Result<ConstructionDeriveResponse> {
         // NOTE: This will get P2PKH SegWit addresses.
         // Most exchanges implement this as standard nowadays.
         let descriptor = format!("wpkh({})", encode_to_hex_string(&data.public_key.bytes));
-        let address = rpc_caller
-            .rpc_call::<Response<String>>(BitcoinJrpc::new("deriveaddresses", &[descriptor]))
+        let address = node_caller
+            .rpc_call::<String>(BitcoinJrpc::new("deriveaddresses", &[descriptor]))
             .await?;
         Ok(ConstructionDeriveResponse {
             address: None,
@@ -60,10 +62,10 @@ impl ConstructionApi for BitcoinConstructionApi {
         &self,
         _caller: Caller,
         data: ConstructionHashRequest,
-        rpc_caller: RpcCaller,
+        node_caller: &Self::NodeCaller,
     ) -> Result<TransactionIdentifierResponse> {
-        let hash = rpc_caller
-            .rpc_call::<Response<BitcoinTransaction>>(BitcoinJrpc::new(
+        let hash = node_caller
+            .rpc_call::<BitcoinTransaction>(BitcoinJrpc::new(
                 "decoderawtransaction",
                 &[data.signed_transaction],
             ))
@@ -79,10 +81,10 @@ impl ConstructionApi for BitcoinConstructionApi {
         &self,
         _caller: Caller,
         _data: ConstructionMetadataRequest,
-        rpc_caller: RpcCaller,
+        node_caller: &Self::NodeCaller,
     ) -> Result<ConstructionMetadataResponse> {
-        let suggested_fee = rpc_caller
-            .rpc_call::<Response<FeeEstimate>>(BitcoinJrpc::new(
+        let suggested_fee = node_caller
+            .rpc_call::<FeeEstimate>(BitcoinJrpc::new(
                 "estimatesmartfee",
                 // NOTE: this might produce slower to confirm transactions, but they will be
                 // cheaper.
@@ -110,7 +112,7 @@ impl ConstructionApi for BitcoinConstructionApi {
         &self,
         _caller: Caller,
         data: ConstructionParseRequest,
-        rpc_caller: RpcCaller,
+        node_caller: &Self::NodeCaller,
     ) -> Result<ConstructionParseResponse> {
         let tx = BitcoinTransaction::from(Transaction::deserialize(
             &hex::decode(data.transaction).merr(|e| format!("transaction malformed: {e}"))?,
@@ -119,7 +121,7 @@ impl ConstructionApi for BitcoinConstructionApi {
         Ok(ConstructionParseResponse {
             operations: tx
                 .clone()
-                .into_transaction(0, &rpc_caller)
+                .into_transaction(0, node_caller)
                 .await?
                 .operations,
             signers: Vec::new(),
@@ -144,7 +146,7 @@ impl ConstructionApi for BitcoinConstructionApi {
         &self,
         _caller: Caller,
         data: ConstructionPayloadsRequest,
-        rpc_caller: RpcCaller,
+        node_caller: &Self::NodeCaller,
     ) -> Result<ConstructionPayloadsResponse> {
         let mut tx = Transaction {
             version: 2,
@@ -183,8 +185,8 @@ impl ConstructionApi for BitcoinConstructionApi {
 
         let mut payloads = vec![];
         for (i, input) in tx.input.iter().enumerate() {
-            let script_pub_key = rpc_caller
-                .rpc_call::<Response<BitcoinTransaction>>(BitcoinJrpc::new(
+            let script_pub_key = node_caller
+                .rpc_call::<BitcoinTransaction>(BitcoinJrpc::new(
                     "getrawtransaction",
                     &[json!(input.previous_output.txid.to_string()), json!(true)],
                 ))
@@ -236,7 +238,7 @@ impl ConstructionApi for BitcoinConstructionApi {
         &self,
         _caller: Caller,
         data: ConstructionPreprocessRequest,
-        _rpc_caller: RpcCaller,
+        _node_caller: &Self::NodeCaller,
     ) -> Result<ConstructionPreprocessResponse> {
         let mut options = IndexMap::new();
 
@@ -278,10 +280,10 @@ impl ConstructionApi for BitcoinConstructionApi {
         &self,
         _caller: Caller,
         data: ConstructionSubmitRequest,
-        rpc_caller: RpcCaller,
+        node_caller: &Self::NodeCaller,
     ) -> Result<TransactionIdentifierResponse> {
-        let hash = rpc_caller
-            .rpc_call::<Response<String>>(BitcoinJrpc::new(
+        let hash = node_caller
+            .rpc_call::<String>(BitcoinJrpc::new(
                 "sendrawtransaction",
                 &[data.signed_transaction],
             ))

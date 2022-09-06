@@ -10,4 +10,6 @@ pub struct BitcoinEventsApi;
 impl EventsApiRouter for BitcoinEventsApi {}
 
 #[async_trait]
-impl EventsApi for BitcoinEventsApi {}
+impl EventsApi for BitcoinEventsApi {
+    type NodeCaller = BitcoinCaller;
+}

@@ -8,7 +8,6 @@ use mentat_server::{
     indexmap::IndexMap,
     serde::{Deserialize, Serialize},
     serde_json::{self, json},
-    server::RpcCaller,
 };
 use mentat_types::{
     AccountIdentifier,
@@ -26,10 +25,7 @@ use mentat_types::{
     TransactionIdentifier,
 };
 
-use crate::{
-    request::{trim_hash, BitcoinJrpc},
-    responses::Response,
-};
+use crate::request::{trim_hash, BitcoinCaller, BitcoinJrpc};
 
 /// a bitcoind scriptsig field
 #[allow(clippy::missing_docs_in_private_items)]
@@ -60,12 +56,12 @@ impl BitcoinVin {
         self,
         trans_idx: usize,
         vin_index: usize,
-        rpc_caller: &RpcCaller,
+        node_caller: &BitcoinCaller,
     ) -> Result<Operation, MentatError> {
         let (account, amount) = match (&self.txid, self.vout) {
             (Some(id), Some(vout_idx)) => {
-                let transaction = rpc_caller
-                    .rpc_call::<Response<BitcoinTransaction>>(BitcoinJrpc::new(
+                let transaction = node_caller
+                    .rpc_call::<BitcoinTransaction>(BitcoinJrpc::new(
                         "getrawtransaction",
                         &[json!(trim_hash(id)), json!(true)],
                     ))
@@ -218,7 +214,7 @@ impl BitcoinTransaction {
     pub async fn into_transaction(
         self,
         index: usize,
-        rpc_caller: &RpcCaller,
+        node_caller: &BitcoinCaller,
     ) -> Result<Transaction, MentatError> {
         Ok(Transaction {
             transaction_identifier: TransactionIdentifier {
@@ -230,7 +226,7 @@ impl BitcoinTransaction {
                     self.vin
                         .into_iter()
                         .enumerate()
-                        .map(|(i, vin)| vin.into_operation(index, i, rpc_caller)),
+                        .map(|(i, vin)| vin.into_operation(index, i, node_caller)),
                 )
                 .await
                 .into_iter()

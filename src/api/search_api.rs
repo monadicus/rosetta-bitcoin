@@ -10,4 +10,6 @@ pub struct BitcoinSearchApi;
 impl SearchApiRouter for BitcoinSearchApi {}
 
 #[async_trait]
-impl SearchApi for BitcoinSearchApi {}
+impl SearchApi for BitcoinSearchApi {
+    type NodeCaller = BitcoinCaller;
+}

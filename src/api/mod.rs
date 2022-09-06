@@ -56,14 +56,13 @@ use mentat_server::{
     conf::{Mode, NodePid},
     indexmap::IndexMap,
     serde_json::{json, Value},
-    server::RpcCaller,
     sysinfo::Pid,
 };
 use mentat_types::*;
 pub use search_api::*;
 
 use crate::{
-    request::{trim_hash, BitcoinJrpc, ScanObjectsDescriptor},
+    request::{trim_hash, BitcoinCaller, BitcoinJrpc, ScanObjectsDescriptor},
     responses::{
         common::{BitcoinTransaction, FeeEstimate},
         data::{
@@ -75,6 +74,5 @@ use crate::{
         },
         Address,
         Network,
-        Response,
     },
 };

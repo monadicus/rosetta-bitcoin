@@ -12,7 +12,7 @@ use mentat_server::{
 /// configuration information/logic for the bitcoind node
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(crate = "mentat_server::serde")]
-pub struct NodeConfig {
+pub struct BitcoinConfig {
     /// where to store blocks and other data
     data_dir: PathBuf,
     /// the username to set on bitcoind
@@ -22,21 +22,8 @@ pub struct NodeConfig {
 }
 
 #[async_trait]
-impl NodeConf for NodeConfig {
+impl NodeConf for BitcoinConfig {
     const BLOCKCHAIN: &'static str = "Bitcoin";
-
-    fn build_url(conf: &Configuration<Self>) -> Url {
-        let url = format!(
-            "{}://{}:{}@{}:{}",
-            if conf.secure_http { "https" } else { "http" },
-            conf.custom.user,
-            conf.custom.pass,
-            conf.node_address,
-            conf.node_rpc_port
-        );
-
-        Url::from_str(&url).expect("Invalid node url: {url}")
-    }
 
     fn node_command(config: &Configuration<Self>) -> Command {
         let mut command = Command::new(&config.node_path);
@@ -55,5 +42,22 @@ impl NodeConf for NodeConfig {
             &format!("--datadir={}", config.custom.data_dir.display()),
         ]);
         command
+    }
+}
+
+impl BitcoinConfig {
+    /// Builds the url used to call the node using the settings in the user
+    /// config
+    pub fn build_url(conf: &Configuration<Self>) -> Url {
+        let url = format!(
+            "{}://{}:{}@{}:{}",
+            if conf.secure_http { "https" } else { "http" },
+            conf.custom.user,
+            conf.custom.pass,
+            conf.node_address,
+            conf.node_rpc_port
+        );
+
+        Url::from_str(&url).expect("Invalid node url: {url}")
     }
 }

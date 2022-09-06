@@ -11,11 +11,13 @@ impl AccountApiRouter for BitcoinAccountApi {}
 
 #[async_trait]
 impl AccountApi for BitcoinAccountApi {
+    type NodeCaller = BitcoinCaller;
+
     async fn account_balance(
         &self,
         _caller: Caller,
         data: AccountBalanceRequest,
-        rpc_caller: RpcCaller,
+        node_caller: &Self::NodeCaller,
     ) -> Result<AccountBalanceResponse> {
         let id = match data.block_identifier {
             Some(PartialBlockIdentifier {
@@ -27,16 +29,16 @@ impl AccountApi for BitcoinAccountApi {
                 hash: None,
             }) => Some(BlockIdentifier {
                 index,
-                hash: rpc_caller
-                    .rpc_call::<Response<String>>(BitcoinJrpc::new("getblockhash", &[index]))
+                hash: node_caller
+                    .rpc_call::<String>(BitcoinJrpc::new("getblockhash", &[index]))
                     .await?,
             }),
             Some(PartialBlockIdentifier {
                 index: None,
                 hash: Some(hash),
             }) => Some(BlockIdentifier {
-                index: rpc_caller
-                    .rpc_call::<Response<GetBlockResponse>>(BitcoinJrpc::new(
+                index: node_caller
+                    .rpc_call::<GetBlockResponse>(BitcoinJrpc::new(
                         "getblock",
                         &[json!(trim_hash(&hash)), json!(2u32)],
                     ))
@@ -65,8 +67,8 @@ impl AccountApi for BitcoinAccountApi {
             ]
         };
 
-        Ok(rpc_caller
-            .rpc_call::<Response<ScanTxOutSetResult>>(BitcoinJrpc::new("scantxoutset", &args))
+        Ok(node_caller
+            .rpc_call::<ScanTxOutSetResult>(BitcoinJrpc::new("scantxoutset", &args))
             .await?
             .into_balance(id))
     }
