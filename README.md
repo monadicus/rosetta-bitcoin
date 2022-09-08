@@ -33,8 +33,54 @@ docker run -d --rm --ulimit "nofile=100000:100000" -v "$(pwd)/data:/data" -p 808
 Cloned repo:
 
 ```text
-make run-online
+make run
 ```
+
+<!-- ###### **Mainnet:Online**
+
+Uncloned repo:
+```text
+docker run -d --rm --ulimit "nofile=100000:100000" -v "$(pwd)/bitcoin-data:/data" -p 8080:8080 -p 8333:8333 rosetta-bitcoin:latest
+```
+Cloned repo:
+```text
+make run-mainnet-online
+```
+
+###### **Mainnet:Offline**
+
+Uncloned repo:
+```text
+docker run -d --rm -p 8081:8081 rosetta-bitcoin:latest
+```
+Cloned repo:
+```text
+make run-mainnet-offline
+```
+
+###### **Testnet:Online**
+
+Uncloned repo:
+```text
+docker run -d --rm --ulimit "nofile=100000:100000" -v "$(pwd)/bitcoin-data:/data" -p 8080:8080 -p 18333:18333 rosetta-bitcoin:latest
+```
+
+Cloned repo:
+```text
+make run-testnet-online
+```
+
+###### **Testnet:Offline**
+
+Uncloned repo:
+```text
+docker run -d --rm -p 8081:8081 rosetta-bitcoin:latest
+```
+
+Cloned repo:
+```text
+make run-testnet-offline
+``` -->
 
 ### Example Requests
 
