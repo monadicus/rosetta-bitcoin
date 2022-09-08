@@ -4,7 +4,7 @@ use std::{path::PathBuf, process::Command, str::FromStr};
 
 use mentat_server::{
     axum::async_trait,
-    conf::{Configuration, NodeConf},
+    conf::{Configuration, Network, NodeConf},
     reqwest::Url,
     serde::{Deserialize, Serialize},
 };
@@ -27,20 +27,24 @@ impl NodeConf for BitcoinConfig {
 
     fn node_command(config: &Configuration<Self>) -> Command {
         let mut command = Command::new(&config.node_path);
-        command.args(&[
+        let mut args = vec![
             // TODO cant bind to address without setting a whitelist
             // &format!("--bind={address}:4132"),
             // &format!("--rpcbind={address}:3032"),
-            "-port=4132",
+            "-port=4132".to_string(),
             // TODO `Config options rpcuser and rpcpassword will soon be deprecated.
             // Locally-run instances may remove rpcuser to use cookie-based auth, or may be
             // replaced with rpcauth. Please see share/rpcauth for rpcauth auth generation.`
-            &format!("-rpcport={}", config.node_rpc_port),
-            &format!("-rpcuser={}", config.custom.user),
-            &format!("-rpcpassword={}", config.custom.pass),
-            "-txindex=1",
-            &format!("--datadir={}", config.custom.data_dir.display()),
-        ]);
+            format!("-rpcport={}", config.node_rpc_port),
+            format!("-rpcuser={}", config.custom.user),
+            format!("-rpcpassword={}", config.custom.pass),
+            "-txindex=1".into(),
+            format!("--datadir={}", config.custom.data_dir.display()),
+        ];
+        if config.network == Network::Testnet {
+            args.push("--testnet".to_string())
+        }
+        command.args(&args);
         command
     }
 }

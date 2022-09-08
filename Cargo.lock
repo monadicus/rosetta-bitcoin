@@ -795,7 +795,7 @@ checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
 [[package]]
 name = "mentat-asserter"
 version = "0.1.0"
-source = "git+https://github.com/monadicus/mentat#1d1fbd1b875b251195bee4251fb28de96bb610c4"
+source = "git+https://github.com/monadicus/mentat#6455052d6821cc6e5b1a2c08b9a516d6477d6767"
 dependencies = [
  "include_dir",
  "indexmap",
@@ -809,7 +809,7 @@ dependencies = [
 [[package]]
 name = "mentat-macros"
 version = "0.1.0"
-source = "git+https://github.com/monadicus/mentat#1d1fbd1b875b251195bee4251fb28de96bb610c4"
+source = "git+https://github.com/monadicus/mentat#6455052d6821cc6e5b1a2c08b9a516d6477d6767"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -819,7 +819,7 @@ dependencies = [
 [[package]]
 name = "mentat-server"
 version = "0.1.0"
-source = "git+https://github.com/monadicus/mentat#1d1fbd1b875b251195bee4251fb28de96bb610c4"
+source = "git+https://github.com/monadicus/mentat#6455052d6821cc6e5b1a2c08b9a516d6477d6767"
 dependencies = [
  "axum",
  "color-backtrace",
@@ -850,7 +850,7 @@ dependencies = [
 [[package]]
 name = "mentat-types"
 version = "0.1.0"
-source = "git+https://github.com/monadicus/mentat#1d1fbd1b875b251195bee4251fb28de96bb610c4"
+source = "git+https://github.com/monadicus/mentat#6455052d6821cc6e5b1a2c08b9a516d6477d6767"
 dependencies = [
  "axum",
  "from_tuple",

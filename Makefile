@@ -17,17 +17,8 @@ build-release:
 	docker build -t mentat-rosetta-bitcoin:$(version) .
 	docker save mentat-rosetta-bitcoin:$(version) | gzip > mentat-rosetta-bitcoin-$(version).tar.gz;
 
-run-mainnet-online:
-	docker run -d --rm --ulimit "nofile=${NOFILE}:${NOFILE}" -v "${PWD}/data:/data" -e "MODE=ONLINE" -e "NETWORK=MAINNET" -e "PORT=8080" -p 8080:8080 -p 4132:4132 mentat-rosetta-bitcoin:latest
-
-run-mainnet-offline:
-	docker run -d --rm -e "MODE=OFFLINE" -e "NETWORK=MAINNET" -e "PORT=8080" -p 8080:8080 -p 4132:4132 mentat-rosetta-bitcoin:latest
-
-run-testnet-online:
-	docker run -d --rm --ulimit "nofile=${NOFILE}:${NOFILE}" -v "${PWD}/data:/data" -e "MODE=ONLINE" -e "NETWORK=TESTNET" -e "PORT=8080" -p 8080:8080 -p 4132:4132 mentat-rosetta-bitcoin:latest
-
-run-testnet-offline:
-	docker run -d --rm -e "MODE=OFFLINE" -e "NETWORK=TESTNET" -e "PORT=8080" -p 8080:8080 -p 4132:4132 mentat-rosetta-bitcoin:latest
+run:
+	docker run -d --rm --ulimit "nofile=${NOFILE}:${NOFILE}" -v "${PWD}/data:/data" -p 8080:8080 -p 4132:4132 mentat-rosetta-bitcoin:latest
 
 tracing:
 	docker run -d -p6831:6831/udp -p6832:6832/udp -p16686:16686 -p14268:14268 jaegertracing/all-in-one:latest

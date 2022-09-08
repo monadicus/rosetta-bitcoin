@@ -12,60 +12,28 @@ make build-local
 
 #### Run Docker
 
-Running these commands will start a Docker container in [detached mode](https://docs.docker.com/engine/reference/run/#detached--d) with a data directory at `<working directory>/bitcoin-data` and the Rosetta API accessible at port `8080`.
+Running these commands will start a Docker container in [detached mode](https://docs.docker.com/engine/reference/run/#detached--d) with a data directory at `<working directory>/data` and the Rosetta API accessible at port `8080`.
 
 ##### Configuration
 
-the file [docker.conf.toml](docker.conf.toml) contains the settings that the docker image will use
+the file [docker.conf.toml](docker.conf.toml) contains the settings that the docker image will use. You can control if the node runs in `Online` or `Offline` mode, as well as if it runs on `Mainnet` or `Testnet`
 
 ##### Command Examples
 
 You can run these commands from the command line. If you cloned the repository, you can use the `make` commands shown after the examples.
 
-###### **Mainnet:Online**
+###### **Running a Container**
 
 Uncloned repo:
+
 ```text
-docker run -d --rm --ulimit "nofile=100000:100000" -v "$(pwd)/bitcoin-data:/data" -p 8080:8080 -p 8333:8333 rosetta-bitcoin:latest
+docker run -d --rm --ulimit "nofile=100000:100000" -v "$(pwd)/data:/data" -p 8080:8080 -p 4132:4132 mentat-rosetta-bitcoin:latest
 ```
+
 Cloned repo:
+
 ```text
-make run-mainnet-online
-```
-
-###### **Mainnet:Offline**
-
-Uncloned repo:
-```text
-docker run -d --rm -p 8081:8081 rosetta-bitcoin:latest
-```
-Cloned repo:
-```text
-make run-mainnet-offline
-```
-
-###### **Testnet:Online**
-
-Uncloned repo:
-```text
-docker run -d --rm --ulimit "nofile=100000:100000" -v "$(pwd)/bitcoin-data:/data" -p 8080:8080 -p 18333:18333 rosetta-bitcoin:latest
-```
-
-Cloned repo: 
-```text
-make run-testnet-online
-```
-
-###### **Testnet:Offline**
-
-Uncloned repo:
-```text
-docker run -d --rm -p 8081:8081 rosetta-bitcoin:latest
-```
-
-Cloned repo: 
-```text
-make run-testnet-offline
+make run-online
 ```
 
 ### Example Requests
