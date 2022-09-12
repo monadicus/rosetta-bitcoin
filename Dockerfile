@@ -26,7 +26,7 @@ RUN mkdir -p /app \
 WORKDIR /app
 
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get update && apt-get install -y curl clang git
+RUN apt-get update && apt-get install -y curl clang git pkg-config libssl-dev
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH=/root/.cargo/bin:$PATH
@@ -45,7 +45,7 @@ ENV ROCKET_ENV "production"
 RUN apt-get update && apt-get install -y libssl-dev
 
 RUN mkdir -p /app/data \
-    && chown -R nobody:nogroup /app 
+    && chown -R nobody:nogroup /app
 
 WORKDIR /app
 
@@ -53,7 +53,7 @@ WORKDIR /app
 COPY --from=bitcoin-node-builder /app/node-runner /app/node-runner
 
 # Copy binary from rosetta-bitcoin-server
-COPY --from=rosetta-mentat-builder /app/* /app 
+COPY --from=rosetta-mentat-builder /app/* /app
 
 # Set permissions for everything added to /app
 RUN chmod -R 755 /app/*
